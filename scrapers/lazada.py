@@ -267,7 +267,7 @@ class MockLazadaScraper(BaseScraper):
 
         for item in self._catalog:
             title = item["title"].lower()
-            if any(term in title for term in search_terms):
+            if all(term in title for term in search_terms):
                 results.append(dict(item))
 
         return results

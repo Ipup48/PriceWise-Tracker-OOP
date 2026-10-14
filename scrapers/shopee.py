@@ -267,7 +267,7 @@ class MockShopeeScraper(BaseScraper):
 
         for item in self._catalog:
             item_name = item["item_name"].lower()
-            if any(term in item_name for term in search_terms):
+            if all(term in item_name for term in search_terms):
                 results.append(dict(item))
 
         return results
