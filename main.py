@@ -304,11 +304,14 @@ class MockAmazonScraper(BaseScraper):
         return self._base_url
 
     def fetch(self, keyword: str) -> list[dict[str, Any]]:
-        tokens = keyword.lower().split()
+        clean_kw = keyword.strip().lower()
+        if clean_kw in ("all", "ทั้งหมด", "*"):
+            return [dict(item) for item in self._catalog]
+        tokens = clean_kw.split()
         return [
             item
             for item in self._catalog
-            if any(token in item["title"].lower() for token in tokens)
+            if all(token in item["title"].lower() for token in tokens)
         ]
 
     def parse(self, raw_data: list[dict[str, Any]]) -> list[Product]:

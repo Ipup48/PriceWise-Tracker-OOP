@@ -354,7 +354,8 @@
               id="sort-select" 
               class="bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
             >
-              <option value="price-asc">ราคา: ต่ำไปสูง (แนะนำ)</option>
+              <option value="relevance" selected>ความเกี่ยวข้อง (แนะนำ)</option>
+              <option value="price-asc">ราคา: ต่ำไปสูง</option>
               <option value="price-desc">ราคา: สูงไปต่ำ</option>
               <option value="discount-desc">ส่วนลดสูงสุด (%)</option>
               <option value="name-asc">ชื่อสินค้า (ก-ฮ)</option>
@@ -371,23 +372,36 @@
         </div>
 
         <!-- Empty State Container -->
-        <div id="empty-state" class="hidden bg-white border border-dashed border-slate-300 rounded-2xl p-10 text-center space-y-3">
-          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
-            <i data-lucide="package-search" class="w-6 h-6"></i>
+        <div id="empty-state" class="hidden bg-white border border-dashed border-slate-300 rounded-2xl p-8 sm:p-10 text-center space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-500 mx-auto flex items-center justify-center shadow-xs">
+            <i data-lucide="package-search" class="w-7 h-7"></i>
           </div>
-          <div>
-            <h4 class="text-sm font-semibold text-slate-800">ไม่พบสินค้าที่ตรงกับคำค้นหา</h4>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-              ลองปรับเพดานราคาสูงสุด หรือค้นหาด้วยคำค้นหาอื่น เช่น "Sony", "iPad", "iPhone", "PS5", "Dyson", "Switch"
+          <div class="space-y-1">
+            <h4 class="text-sm sm:text-base font-bold text-slate-900">
+              ไม่พบสินค้าที่ตรงกับ "<span id="empty-state-query" class="text-indigo-600"></span>"
+            </h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              ลองตรวจสอบตัวสะกด หรือค้นหาด้วยคีย์เวิร์ดอื่น เช่น "Sony", "iPad", "iPhone", "PS5", "Dyson", "Air"
             </p>
           </div>
-          <button 
-            type="button" 
-            onclick="document.getElementById('reset-filters-btn').click()" 
-            class="px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-medium hover:bg-indigo-700 transition"
-          >
-            รีเซ็ตตัวกรองทั้งหมด
-          </button>
+          <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+            <button 
+              type="button" 
+              id="empty-clear-search-btn"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-xs transition active:scale-95"
+            >
+              <i data-lucide="search-x" class="w-3.5 h-3.5"></i>
+              <span>ล้างคำค้นหา</span>
+            </button>
+            <button 
+              type="button" 
+              id="empty-reset-filters-btn"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-semibold transition active:scale-95"
+            >
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>รีเซ็ตตัวกรองทั้งหมด</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -515,6 +529,66 @@
       }
     }
 
+    function escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function calculateRelevanceScore(productName, keyword) {
+      if (!productName || !keyword) return 0;
+
+      const name = productName.toLowerCase();
+      const rawQ = keyword.trim().toLowerCase();
+      const terms = rawQ.split(/\s+/).filter(Boolean);
+
+      if (terms.length === 0) return 0;
+
+      let score = 0;
+
+      // 1. ตรงกันทั้งหมด (Exact match)
+      if (name === rawQ) {
+        score += 10000;
+      }
+
+      // 2. ชื่อสินค้าขึ้นต้นด้วยข้อความค้นหาเต็มๆ (Starts with full query)
+      if (name.startsWith(rawQ)) {
+        score += 5000;
+      }
+
+      // 3. ชื่อสินค้าขึ้นต้นด้วยคำค้นหาแรก (เช่น แบรนด์ "Sony", "Apple")
+      if (name.startsWith(terms[0])) {
+        score += 2500;
+      }
+
+      // 4. มีกลุ่มคำค้นหาติดกันครบถ้วนในชื่อ (Exact phrase match)
+      const phraseIdx = name.indexOf(rawQ);
+      if (phraseIdx !== -1) {
+        score += Math.max(100, 1500 - phraseIdx * 15);
+      }
+
+      // 5. คำค้นหาตรงตัวเต็มคำ (Whole word match)
+      // สินค้าที่มีคำตรงตัว เช่น "Air" ใน "MacBook Air" จะได้คะแนนสูงกว่าคำที่เป็นเพียงส่วนย่อย เช่น "air" ใน "airpods"
+      terms.forEach(term => {
+        const wordRegex = new RegExp(`(^|[\\s\\(\\)\\[\\]\\-_/.,])${escapeRegex(term)}([\\s\\(\\)\\[\\]\\-_/.,]|$)`, 'i');
+        if (wordRegex.test(name)) {
+          score += 1000; // คำตรงตัวเต็มคำ (Exact word boundary match)
+        } else if (name.includes(term)) {
+          score += 200; // เป็นเพียงคำประกอบย่อยในคำอื่น (Sub-part of another word)
+        }
+
+        // ยิ่งคำปรากฏอยู่ส่วนหน้าของชื่อสินค้า ยิ่งได้คะแนน
+        const termIdx = name.indexOf(term);
+        if (termIdx !== -1) {
+          score += Math.max(0, 300 - termIdx * 5);
+        }
+      });
+
+      // 6. สัดส่วนความยาวของคำค้นหาเทียบกับความยาวชื่อสินค้า (Coverage ratio)
+      const coverageRatio = Math.min(1, rawQ.length / name.length);
+      score += Math.round(coverageRatio * 400);
+
+      return score;
+    }
+
     class BaseScraper {
       constructor() {
         if (this.constructor === BaseScraper) {
@@ -614,10 +688,15 @@
       get baseUrl() { return this._baseUrl; }
 
       fetch(keyword) {
-        const terms = keyword.toLowerCase().split(/\s+/);
+        const cleanKw = (keyword || '').trim().toLowerCase();
+        if (!cleanKw) return [];
+        if (cleanKw === '*' || cleanKw === 'all' || cleanKw === 'ทั้งหมด') {
+          return [...this._catalog];
+        }
+        const terms = cleanKw.split(/\s+/).filter(Boolean);
         return this._catalog.filter(item => {
-          const name = item.item_name.toLowerCase();
-          return terms.some(t => name.includes(t));
+          const name = (item.item_name || '').toLowerCase();
+          return terms.every(t => name.includes(t));
         });
       }
 
@@ -688,10 +767,15 @@
       get baseUrl() { return this._baseUrl; }
 
       fetch(keyword) {
-        const terms = keyword.toLowerCase().split(/\s+/);
+        const cleanKw = (keyword || '').trim().toLowerCase();
+        if (!cleanKw) return [];
+        if (cleanKw === '*' || cleanKw === 'all' || cleanKw === 'ทั้งหมด') {
+          return [...this._catalog];
+        }
+        const terms = cleanKw.split(/\s+/).filter(Boolean);
         return this._catalog.filter(item => {
-          const title = item.title.toLowerCase();
-          return terms.some(t => title.includes(t));
+          const title = (item.title || '').toLowerCase();
+          return terms.every(t => title.includes(t));
         });
       }
 
@@ -762,10 +846,15 @@
       get baseUrl() { return this._baseUrl; }
 
       fetch(keyword) {
-        const terms = keyword.toLowerCase().split(/\s+/);
+        const cleanKw = (keyword || '').trim().toLowerCase();
+        if (!cleanKw) return [];
+        if (cleanKw === '*' || cleanKw === 'all' || cleanKw === 'ทั้งหมด') {
+          return [...this._catalog];
+        }
+        const terms = cleanKw.split(/\s+/).filter(Boolean);
         return this._catalog.filter(item => {
-          const t = item.title.toLowerCase();
-          return terms.some(term => t.includes(term));
+          const t = (item.title || '').toLowerCase();
+          return terms.every(term => t.includes(term));
         });
       }
 
@@ -809,11 +898,12 @@
 
       compare(keyword, options = {}) {
         const { inStockOnly = false, maxPrice = Infinity, enabledPlatforms = null } = options;
-        if (!keyword || !keyword.trim()) {
+        const cleanKw = (keyword || '').trim();
+        if (!cleanKw) {
           return { items: [], stats: { min: 0, max: 0, avg: 0, count: 0, inStock: 0 }, bestDeal: null };
         }
 
-        ExecutionLogger.log(`>>> เริ่มต้นการรวบรวมและเปรียบเทียบราคาสำหรับ: "${keyword}" (เป้าหมาย: ${this.targetCurrency})`);
+        ExecutionLogger.log(`>>> เริ่มต้นการรวบรวมและเปรียบเทียบราคาสำหรับ: "${cleanKw}" (เป้าหมาย: ${this.targetCurrency})`);
         const allItems = [];
 
         this.scrapers.forEach(scraper => {
@@ -822,7 +912,7 @@
           }
 
           try {
-            const products = scraper.scrape(keyword);
+            const products = scraper.scrape(cleanKw);
             products.forEach(product => {
               if (inStockOnly && !product.inStock) return;
 
@@ -840,12 +930,14 @@
 
               if (normalizedPrice > maxPrice) return;
 
+              const relevanceScore = calculateRelevanceScore(product.name, cleanKw);
               const sym = getCurrencySymbol(this.targetCurrency);
 
               allItems.push({
                 product,
                 normalizedPrice,
                 normalizedOriginalPrice,
+                relevanceScore,
                 targetCurrency: this.targetCurrency,
                 formattedNormalizedPrice: `${sym}${normalizedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 formattedNormalizedOriginalPrice: `${sym}${normalizedOriginalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -856,10 +948,13 @@
           }
         });
 
-        allItems.sort((a, b) => a.normalizedPrice - b.normalizedPrice);
+        // จัดอันดับเริ่มต้นตามคะแนนความเกี่ยวข้อง (Relevance Ranking):
+        // สินค้าที่มีชื่อขึ้นต้นด้วยคีย์เวิร์ด หรือมีคีย์เวิร์ดตรงตัวจะอยู่อันดับต้นๆ หากคะแนนเท่ากันจึงเรียงตามราคาต่ำไปสูง
+        allItems.sort((a, b) => b.relevanceScore - a.relevanceScore || a.normalizedPrice - b.normalizedPrice);
 
         const inStockItems = allItems.filter(item => item.product.inStock);
-        const bestDeal = inStockItems.length > 0 ? inStockItems[0] : (allItems.length > 0 ? allItems[0] : null);
+        const sortedByPrice = [...inStockItems].sort((a, b) => a.normalizedPrice - b.normalizedPrice);
+        const bestDeal = sortedByPrice.length > 0 ? sortedByPrice[0] : (allItems.length > 0 ? [...allItems].sort((a, b) => a.normalizedPrice - b.normalizedPrice)[0] : null);
 
         const prices = allItems.map(i => i.normalizedPrice);
         const minPrice = prices.length ? Math.min(...prices) : 0;
@@ -867,7 +962,7 @@
         const avgPrice = prices.length ? Math.round((prices.reduce((a, b) => a + b, 0) / prices.length) * 100) / 100 : 0;
 
         return {
-          keyword,
+          keyword: cleanKw,
           targetCurrency: this.targetCurrency,
           items: allItems,
           bestDeal,
@@ -1087,28 +1182,32 @@
       const autocompleteList = document.getElementById('autocomplete-list');
 
       function buildSuggestions(query) {
-        if (!query || query.trim().length < 2) return [];
-        const q = query.toLowerCase();
+        if (!query || !query.trim() || query.trim().length < 2) return [];
+        const cleanQ = query.trim().toLowerCase();
+        const terms = cleanQ.split(/\s+/).filter(Boolean);
 
         // รวม catalog ชื่อสินค้าจากทั้ง 3 scrapers (de-duplicated by keyword group)
-        const allNames = new Map(); // key = normalized product key, value = display label
+        const allNames = new Map();
         [shopeeScraper, lazadaScraper, amazonScraper].forEach(scraper => {
           scraper._catalog.forEach(item => {
             const title = item.item_name || item.title;
             if (!title) return;
-            // ตัด keyword หลัก (คำ 3 คำแรก) เป็น key เพื่อ de-duplicate
             const key = title.toLowerCase().split(/\s+/).slice(0, 3).join(' ');
             if (!allNames.has(key)) allNames.set(key, title);
           });
         });
 
-        const results = [];
-        allNames.forEach((displayName, key) => {
-          if (key.includes(q) || displayName.toLowerCase().includes(q)) {
-            results.push(displayName);
+        const matched = [];
+        allNames.forEach((displayName) => {
+          const nameLower = displayName.toLowerCase();
+          if (terms.every(t => nameLower.includes(t))) {
+            const score = calculateRelevanceScore(displayName, cleanQ);
+            matched.push({ displayName, score });
           }
         });
-        return results.slice(0, 8); // สูงสุด 8 รายการ
+
+        matched.sort((a, b) => b.score - a.score);
+        return matched.slice(0, 8).map(m => m.displayName);
       }
 
       function showAutocomplete(suggestions) {
@@ -1214,9 +1313,26 @@
         slider.value = cfg.defaultVal;
         const sym = getCurrencySymbol(engine.targetCurrency);
         sliderLabel.textContent = `${sym}${Number(cfg.defaultVal).toLocaleString()}`;
-        sortSelect.value = 'price-asc';
+        sortSelect.value = 'relevance';
         renderProductTags(activeCat);
       });
+
+      // ปุ่มล้างคำค้นหา และปุ่มรีเซ็ตใน Empty State
+      const emptyClearBtn = document.getElementById('empty-clear-search-btn');
+      if (emptyClearBtn) {
+        emptyClearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          clearBtn.classList.add('hidden');
+          renderProductTags(activeCat);
+        });
+      }
+
+      const emptyResetBtn = document.getElementById('empty-reset-filters-btn');
+      if (emptyResetBtn) {
+        emptyResetBtn.addEventListener('click', () => {
+          document.getElementById('reset-filters-btn').click();
+        });
+      }
     }
 
     function getEnabledPlatforms() {
@@ -1283,19 +1399,28 @@
 
       if (!res || res.items.length === 0) {
         container.innerHTML = '';
+        const emptyQueryEl = document.getElementById('empty-state-query');
+        if (emptyQueryEl) {
+          emptyQueryEl.textContent = res ? res.keyword : getCurrentSearchQuery();
+        }
         emptyState.classList.remove('hidden');
+        if (window.lucide) {
+          lucide.createIcons();
+        }
         return;
       }
 
       emptyState.classList.add('hidden');
 
       const sorted = [...res.items];
-      if (sortType === 'price-asc') {
-        sorted.sort((a, b) => a.normalizedPrice - b.normalizedPrice);
+      if (sortType === 'relevance') {
+        sorted.sort((a, b) => b.relevanceScore - a.relevanceScore || a.normalizedPrice - b.normalizedPrice);
+      } else if (sortType === 'price-asc') {
+        sorted.sort((a, b) => a.normalizedPrice - b.normalizedPrice || b.relevanceScore - a.relevanceScore);
       } else if (sortType === 'price-desc') {
-        sorted.sort((a, b) => b.normalizedPrice - a.normalizedPrice);
+        sorted.sort((a, b) => b.normalizedPrice - a.normalizedPrice || b.relevanceScore - a.relevanceScore);
       } else if (sortType === 'discount-desc') {
-        sorted.sort((a, b) => b.product.discountPercent - a.product.discountPercent);
+        sorted.sort((a, b) => b.product.discountPercent - a.product.discountPercent || b.relevanceScore - a.relevanceScore);
       } else if (sortType === 'name-asc') {
         sorted.sort((a, b) => a.product.name.localeCompare(b.product.name, 'th'));
       }
