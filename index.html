@@ -254,33 +254,6 @@
           </div>
         </div>
 
-        <!-- 4. เฉพาะสินค้ามีสต็อก -->
-        <div class="pt-2 border-t border-slate-100">
-          <label class="flex items-center justify-between cursor-pointer">
-            <div>
-              <span class="text-xs font-medium text-slate-800 block">เฉพาะสินค้าพร้อมส่ง</span>
-              <span class="text-[11px] text-slate-600">ซ่อนสินค้าที่หมดสต็อก</span>
-            </div>
-            <div class="relative inline-flex items-center">
-              <input type="checkbox" id="stock-filter" class="sr-only peer">
-              <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-            </div>
-          </label>
-        </div>
-
-        <!-- การ์ดแนะนำ OOAD แบบกะทัดรัด -->
-        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="font-semibold text-slate-700 flex items-center gap-1">
-              <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-600"></i>
-              <span>ข้อมูลสถาปัตยกรรม</span>
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-600 leading-relaxed">
-            ระบบมีแคตตาล็อกสินค้ากว่า <strong>26 รายการ</strong> ทำงานด้วย <strong>Template Method</strong> และปรับอัตราแลกเปลี่ยนแบบไดนามิก
-          </p>
-        </div>
-
       </aside>
 
       <!-- ===================================================================== -->
@@ -1287,7 +1260,6 @@
 
       const slider = document.getElementById('price-range-slider');
       const sliderLabel = document.getElementById('price-slider-label');
-      const stockToggle = document.getElementById('stock-filter');
       const sortSelect = document.getElementById('sort-select');
 
       slider.addEventListener('input', () => {
@@ -1296,7 +1268,6 @@
         performSearch(getCurrentSearchQuery());
       });
 
-      stockToggle.addEventListener('change', () => performSearch(getCurrentSearchQuery()));
       sortSelect.addEventListener('change', () => renderProducts());
 
       document.querySelectorAll('.platform-checkbox').forEach(cb => {
@@ -1307,7 +1278,6 @@
         document.getElementById('platform-shopee').checked = true;
         document.getElementById('platform-lazada').checked = true;
         document.getElementById('platform-amazon').checked = true;
-        stockToggle.checked = false;
 
         const cfg = CURRENCY_SLIDER_CONFIG[engine.targetCurrency] || CURRENCY_SLIDER_CONFIG.THB;
         slider.value = cfg.defaultVal;
@@ -1348,12 +1318,11 @@
       if (!searchQuery) return;
       currentSearchQuery = searchQuery;
 
-      const inStockOnly = document.getElementById('stock-filter').checked;
       const maxPrice = Number(document.getElementById('price-range-slider').value);
       const enabledPlatforms = getEnabledPlatforms();
 
       currentComparisonResult = engine.compare(searchQuery, {
-        inStockOnly,
+        inStockOnly: false,
         maxPrice,
         enabledPlatforms
       });
