@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Price Comparison Tracker - OOP & OOAD Architecture Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            shopee: {
+              DEFAULT: '#EE4D2D',
+              light: '#FFF5F1',
+              dark: '#D03E20',
+            },
+            lazada: {
+              DEFAULT: '#0F146D',
+              accent: '#F57224',
+              light: '#EEF0FF',
+            },
+            amazon: {
+              DEFAULT: '#FF9900',
+              dark: '#146EB4',
+              light: '#FFF9E6',
+            },
+            brand: {
+              50: '#F0FDF4',
+              100: '#DCFCE7',
+              500: '#10B981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .best-deal-glow {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.4), 0 8px 10px -6px rgba(16, 185, 129, 0.2);
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.95; transform: scale(1.02); }
+    }
+    .animate-badge {
+      animation: pulse-subtle 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================================================= -->
+  <!-- TOP NAVIGATION HEADER -->
+  <!-- ========================================================================= -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-4">
+        
+        <!-- Brand / Title -->
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+            <i data-lucide="scale" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">PriceMatch<span class="text-indigo-600">Pro</span></h1>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">OOAD & OOP</span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">Multi-Platform Price Comparison Tracker & Architecture Simulator</p>
+          </div>
+        </div>
+
+        <!-- Search Bar with Action -->
+        <div class="flex-1 max-w-xl mx-2">
+          <form id="search-form" class="relative flex items-center">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </div>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search Sony, AirPods, Keyboard, Logitech..." 
+              value="Sony"
+              class="w-full pl-10 pr-24 py-2 sm:py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-inner placeholder:text-slate-400"
+            />
+            <div class="absolute right-1.5 flex items-center gap-1">
+              <button 
+                type="button" 
+                id="clear-search-btn" 
+                class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200/60 transition hidden"
+                title="Clear Search"
+              >
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+              <button 
+                type="submit" 
+                class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-sm transition active:scale-95 flex items-center gap-1"
+              >
+                <span>Compare</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Header Actions: Architecture Modal Button -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button 
+            type="button" 
+            id="open-architecture-btn"
+            class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-slate-800 hover:to-indigo-900 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-slate-200 transition active:scale-95 border border-slate-700"
+          >
+            <i data-lucide="network" class="w-4 h-4 text-emerald-400"></i>
+            <span class="hidden md:inline">Architecture & UML</span>
+            <span class="md:hidden">OOAD</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick Preset Tag Bar -->
+      <div class="pb-3 pt-1 flex items-center gap-2 overflow-x-auto text-xs no-scrollbar">
+        <span class="text-slate-600 font-semibold uppercase tracking-wider text-[11px] shrink-0 flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i> Popular:
+        </span>
+        <button type="button" class="preset-tag px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-medium transition shrink-0" data-query="Sony">
+          🎧 Sony WH-1000XM5
+        </button>
+        <button type="button" class="preset-tag px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-medium transition shrink-0" data-query="AirPods">
+          🍎 Apple AirPods Pro
+        </button>
+        <button type="button" class="preset-tag px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-medium transition shrink-0" data-query="Logitech">
+          🖱️ Logitech MX Master 3S
+        </button>
+        <button type="button" class="preset-tag px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-medium transition shrink-0" data-query="Keyboard">
+          ⌨️ Keychron K2 Keyboard
+        </button>
+        <button type="button" class="preset-tag px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-medium transition shrink-0" data-query="Galaxy Tab">
+          📱 Samsung Galaxy Tab S9
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN CONTAINER (SIDEBAR + CONTENT) -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      
+      <!-- ===================================================================== -->
+      <!-- FILTER & CONFIGURATION SIDEBAR -->
+      <!-- ===================================================================== -->
+      <aside class="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-6">
+        
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-indigo-600"></i>
+            <h2 class="font-bold text-slate-900 text-sm tracking-wide uppercase">Filters & Config</h2>
+          </div>
+          <button 
+            type="button" 
+            id="reset-filters-btn" 
+            class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold hover:underline"
+          >
+            Reset All
+          </button>
+        </div>
+
+        <!-- Currency Selector -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Base Comparison Currency
+          </label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" data-currency="THB" class="currency-btn py-1.5 px-3 rounded-xl border border-indigo-600 bg-indigo-50 text-indigo-700 text-xs font-bold text-center transition">
+              THB (฿)
+            </button>
+            <button type="button" data-currency="USD" class="currency-btn py-1.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold text-center hover:bg-slate-50 transition">
+              USD ($)
+            </button>
+            <button type="button" data-currency="EUR" class="currency-btn py-1.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold text-center hover:bg-slate-50 transition">
+              EUR (€)
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1.5">
+            Normalized using <span class="font-mono font-medium text-slate-600">ICurrencyConverter</span> (1 USD = 36.50 THB)
+          </p>
+        </div>
+
+        <!-- Platform Toggles (Composition & Dependency Injection) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Active Scrapers (DI Registered)
+          </label>
+          <div class="space-y-2.5">
+            
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <input type="checkbox" id="platform-shopee" checked class="platform-checkbox w-4 h-4 rounded text-shopee focus:ring-shopee/40 border-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-shopee"></span>
+                <span class="text-xs font-semibold text-slate-800">Shopee Scraper</span>
+              </div>
+              <span class="text-[10px] bg-orange-100 text-orange-800 font-bold px-1.5 py-0.5 rounded">Active</span>
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <input type="checkbox" id="platform-lazada" checked class="platform-checkbox w-4 h-4 rounded text-lazada focus:ring-lazada/40 border-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-lazada"></span>
+                <span class="text-xs font-semibold text-slate-800">Lazada Scraper</span>
+              </div>
+              <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">Active</span>
+            </label>
+
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <input type="checkbox" id="platform-amazon" checked class="platform-checkbox w-4 h-4 rounded text-amazon focus:ring-amazon/40 border-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-amazon"></span>
+                <span class="text-xs font-semibold text-slate-800">Amazon (OCP Extension)</span>
+              </div>
+              <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">Ext</span>
+            </label>
+
+          </div>
+          <p class="text-[11px] text-slate-600 mt-1.5">
+            Demonstrates <strong>Open/Closed Principle</strong>: Enable or disable scrapers dynamically at runtime.
+          </p>
+        </div>
+
+        <!-- In-Stock Only Toggle -->
+        <div class="pt-2 border-t border-slate-100">
+          <label class="flex items-center justify-between cursor-pointer">
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">In-Stock Items Only</span>
+              <span class="text-[11px] text-slate-600">Filter out unavailable listings</span>
+            </div>
+            <div class="relative inline-flex items-center">
+              <input type="checkbox" id="stock-filter" class="sr-only peer">
+              <div class="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Price Range Slider -->
+        <div class="pt-2 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Max Price Filter</span>
+            <span id="price-slider-label" class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">฿35,000</span>
+          </div>
+          <input 
+            type="range" 
+            id="price-range-slider" 
+            min="1000" 
+            max="35000" 
+            step="500" 
+            value="35000" 
+            class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          />
+          <div class="flex justify-between text-[10px] text-slate-600 mt-1 font-mono">
+            <span>Min (฿1,000)</span>
+            <span>Max (฿35,000+)</span>
+          </div>
+        </div>
+
+        <!-- OOAD Quick Note -->
+        <div class="p-3 bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100/70 text-xs text-slate-600 space-y-1">
+          <div class="font-bold text-indigo-900 flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Architecture Invariants</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-slate-500">
+            Engine enforces Template Method (<span class="font-mono">scrape()</span>) lifecycle: <span class="font-mono">fetch() &rarr; parse() &rarr; validate()</span> before sorting.
+          </p>
+        </div>
+
+      </aside>
+
+      <!-- ===================================================================== -->
+      <!-- MAIN RESULTS DASHBOARD -->
+      <!-- ===================================================================== -->
+      <div class="lg:col-span-3 space-y-6">
+
+        <!-- =================================================================== -->
+        <!-- METRIC SUMMARY CARDS -->
+        <!-- =================================================================== -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          
+          <!-- Metric 1: Best Deal Price -->
+          <div class="bg-white border border-emerald-200/80 rounded-2xl p-4 shadow-sm relative overflow-hidden bg-gradient-to-br from-white to-emerald-50/40">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Cheapest Deal</span>
+              <span class="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+                <i data-lucide="award" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <div class="mt-2">
+              <span id="metric-cheapest" class="text-xl sm:text-2xl font-extrabold text-emerald-600 tracking-tight">฿0.00</span>
+              <p id="metric-cheapest-store" class="text-[11px] text-slate-500 mt-0.5 truncate font-medium">on -</p>
+            </div>
+          </div>
+
+          <!-- Metric 2: Average Price -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Average Price</span>
+              <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+                <i data-lucide="trending-down" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <div class="mt-2">
+              <span id="metric-average" class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">฿0.00</span>
+              <p class="text-[11px] text-slate-500 mt-0.5 font-medium">Across matched items</p>
+            </div>
+          </div>
+
+          <!-- Metric 3: Highest Price -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Highest Price</span>
+              <span class="p-1.5 rounded-lg bg-slate-100 text-slate-600">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <div class="mt-2">
+              <span id="metric-highest" class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">฿0.00</span>
+              <p id="metric-savings" class="text-[11px] text-emerald-600 font-semibold mt-0.5">Save up to ฿0.00</p>
+            </div>
+          </div>
+
+          <!-- Metric 4: Platform Coverage -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Stores Queried</span>
+              <span class="p-1.5 rounded-lg bg-amber-50 text-amber-600">
+                <i data-lucide="store" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <div class="mt-2">
+              <span id="metric-stores" class="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">3 Stores</span>
+              <p id="metric-inventory" class="text-[11px] text-slate-500 mt-0.5 font-medium">0 Products found</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- ACTION BAR / RESULT HEADER -->
+        <!-- =================================================================== -->
+        <div class="bg-white border border-slate-200 rounded-2xl px-5 py-3.5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+              <span>Comparison Results for</span>
+              <span id="query-display-label" class="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 font-mono">"Sony"</span>
+            </h3>
+            <span id="results-count-badge" class="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
+              0 items
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <label for="sort-select" class="text-xs font-semibold text-slate-500 shrink-0">Sort by:</label>
+            <select 
+              id="sort-select" 
+              class="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="price-asc">Price: Lowest to Highest (Default)</option>
+              <option value="price-desc">Price: Highest to Lowest</option>
+              <option value="discount-desc">Biggest Discount %</option>
+              <option value="name-asc">Product Name (A-Z)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- RESULTS LIST / GRID -->
+        <!-- =================================================================== -->
+        <div id="products-container" class="space-y-3.5">
+          <!-- Dynamically injected via JavaScript classes -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="empty-state" class="hidden bg-white border border-dashed border-slate-300 rounded-2xl p-12 text-center space-y-4">
+          <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
+            <i data-lucide="package-search" class="w-8 h-8"></i>
+          </div>
+          <div>
+            <h4 class="text-base font-bold text-slate-800">No matching products found</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+              Try adjusting your max price slider, enable more scrapers, or search for keywords like "Sony", "AirPods", "Keyboard", or "Logitech".
+            </p>
+          </div>
+          <button 
+            type="button" 
+            onclick="document.getElementById('reset-filters-btn').click()" 
+            class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition"
+          >
+            Reset All Filters
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- FOOTER -->
+  <!-- ========================================================================= -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <p class="font-medium">Price Comparison Tracker &bull; Built with pure OOP / OOAD in Python & JavaScript</p>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span>Template Method Pattern</span>
+        <span>&bull;</span>
+        <span>Composition over Inheritance</span>
+        <span>&bull;</span>
+        <span>Dependency Inversion</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- ARCHITECTURE & UML EXPLANATION MODAL -->
+  <!-- ========================================================================= -->
+  <div id="architecture-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden transform scale-95 transition-transform duration-200" id="modal-card">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-emerald-400">
+            <i data-lucide="boxes" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-extrabold tracking-tight">System Architecture & OOAD Design</h3>
+            <p class="text-xs text-slate-400">Object-Oriented Design Patterns & SOLID Principles Breakdown</p>
+          </div>
+        </div>
+        <button type="button" id="close-modal-btn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Tabs -->
+      <div class="flex border-b border-slate-200 bg-slate-50 px-6 gap-2 text-xs font-bold">
+        <button class="modal-tab-btn px-4 py-3 border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-1.5" data-tab="tab-uml">
+          <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
+          <span>UML Class Diagram</span>
+        </button>
+        <button class="modal-tab-btn px-4 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-tab="tab-template">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Template Method Pattern</span>
+        </button>
+        <button class="modal-tab-btn px-4 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-tab="tab-solid">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          <span>SOLID Principles</span>
+        </button>
+        <button class="modal-tab-btn px-4 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-tab="tab-live">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+          <span>Live Execution Trace</span>
+        </button>
+      </div>
+
+      <!-- Modal Content Body -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-slate-700 text-sm">
+        
+        <!-- Tab 1: UML Class Diagram -->
+        <div id="tab-uml" class="modal-tab-content space-y-4">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i data-lucide="network" class="w-4 h-4 text-indigo-600"></i>
+              <span>High-Level Object-Oriented Architecture</span>
+            </h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              The project is cleanly decoupled into <strong>Domain Models</strong>, <strong>Abstract Scraper Interfaces</strong>, <strong>Platform Subclasses</strong>, <strong>Currency Services</strong>, and a central <strong>Price Comparison Engine</strong>.
+            </p>
+
+            <!-- Visual UML Diagram Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              
+              <!-- Engine Box -->
+              <div class="bg-white border-2 border-indigo-500/40 rounded-xl p-4 shadow-sm space-y-2">
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="font-bold text-xs text-indigo-800">Class: PriceComparisonEngine</span>
+                  <span class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded">Aggregator / Context</span>
+                </div>
+                <div class="text-[11px] font-mono text-slate-600 space-y-1">
+                  <div>- _scrapers: Map&lt;string, BaseScraper&gt;</div>
+                  <div>- _converter: ICurrencyConverter</div>
+                  <div>- _targetCurrency: string</div>
+                </div>
+                <div class="text-[11px] font-mono text-indigo-700 border-t pt-1.5 space-y-0.5">
+                  <div>+ registerScraper(scraper: BaseScraper)</div>
+                  <div>+ unregisterScraper(name: string)</div>
+                  <div>+ compare(keyword: string): ComparisonResult</div>
+                </div>
+              </div>
+
+              <!-- BaseScraper Box -->
+              <div class="bg-white border-2 border-emerald-500/40 rounded-xl p-4 shadow-sm space-y-2">
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="font-bold text-xs text-emerald-800">&laquo;abstract&raquo; BaseScraper</span>
+                  <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">Template Pattern</span>
+                </div>
+                <div class="text-[11px] font-mono text-slate-600 space-y-1">
+                  <div>+ platformName: string (abstract)</div>
+                  <div>+ baseUrl: string (abstract)</div>
+                </div>
+                <div class="text-[11px] font-mono text-emerald-700 border-t pt-1.5 space-y-0.5">
+                  <div class="font-bold text-slate-900">+ scrape(keyword): Product[] (Template Method)</div>
+                  <div># fetch(keyword)*: rawData[]</div>
+                  <div># parse(rawData)*: Product[]</div>
+                  <div>+ validate(products): Product[]</div>
+                </div>
+              </div>
+
+              <!-- Subclasses Box -->
+              <div class="bg-white border border-slate-300 rounded-xl p-4 shadow-sm space-y-2">
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="font-bold text-xs text-slate-800">Concrete Scraper Subclasses</span>
+                  <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded">Inherits BaseScraper</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div class="p-2 rounded-lg bg-orange-50 border border-orange-200">
+                    <span class="font-bold text-shopee block">MockShopee</span>
+                    <span class="text-[10px] text-slate-500">Satang &rarr; THB</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-blue-50 border border-blue-200">
+                    <span class="font-bold text-lazada block">MockLazada</span>
+                    <span class="text-[10px] text-slate-500">USD &amp; THB items</span>
+                  </div>
+                  <div class="p-2 rounded-lg bg-amber-50 border border-amber-200">
+                    <span class="font-bold text-amber-700 block">MockAmazon</span>
+                    <span class="text-[10px] text-slate-500">OCP Extension</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Domain & Converter Box -->
+              <div class="bg-white border border-slate-300 rounded-xl p-4 shadow-sm space-y-2">
+                <div class="flex items-center justify-between border-b pb-2">
+                  <span class="font-bold text-xs text-slate-800">Domain Models & Services</span>
+                  <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded">Single Responsibility</span>
+                </div>
+                <div class="text-[11px] font-mono text-slate-600 space-y-1">
+                  <div><strong>Product:</strong> name, price, currency, platform, inStock</div>
+                  <div><strong>ICurrencyConverter:</strong> convert(amount, from, to)</div>
+                  <div><strong>ComparisonResult:</strong> items, stats, errors</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Template Method Pattern -->
+        <div id="tab-template" class="modal-tab-content space-y-4 hidden">
+          <div class="p-5 bg-gradient-to-br from-indigo-50/70 to-white rounded-2xl border border-indigo-100 space-y-3">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i data-lucide="git-commit" class="w-4 h-4 text-indigo-600"></i>
+              <span>Template Method Lifecycle Sequence</span>
+            </h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              The <span class="font-mono font-semibold">BaseScraper.scrape(keyword)</span> method defines the invariant execution skeleton. Subclasses implement platform data retrieval without modifying the overall lifecycle:
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-stretch justify-between gap-3 pt-3">
+              <div class="flex-1 bg-white p-3.5 rounded-xl border-2 border-indigo-200 text-center space-y-1">
+                <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-mono font-bold text-xs inline-flex items-center justify-center">1</span>
+                <h5 class="font-bold text-xs text-slate-900">fetch(keyword)</h5>
+                <p class="text-[11px] text-slate-500">Abstract step. Subclass contacts marketplace API and returns raw payload.</p>
+              </div>
+              <div class="hidden sm:flex items-center text-indigo-400 font-bold">&rarr;</div>
+              <div class="flex-1 bg-white p-3.5 rounded-xl border-2 border-indigo-200 text-center space-y-1">
+                <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-mono font-bold text-xs inline-flex items-center justify-center">2</span>
+                <h5 class="font-bold text-xs text-slate-900">parse(rawData)</h5>
+                <p class="text-[11px] text-slate-500">Abstract step. Converts platform-specific JSON/satang into domain <span class="font-mono">Product</span> objects.</p>
+              </div>
+              <div class="hidden sm:flex items-center text-indigo-400 font-bold">&rarr;</div>
+              <div class="flex-1 bg-white p-3.5 rounded-xl border-2 border-emerald-300 text-center space-y-1">
+                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-mono font-bold text-xs inline-flex items-center justify-center">3</span>
+                <h5 class="font-bold text-xs text-slate-900">validate(products)</h5>
+                <p class="text-[11px] text-slate-500">Concrete step in base class. Filters out corrupted data, negative prices, or empty names.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: SOLID Principles -->
+        <div id="tab-solid" class="modal-tab-content space-y-3 hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
+              <span class="font-extrabold text-xs text-indigo-700">S &bull; Single Responsibility</span>
+              <p class="text-[11px] text-slate-600">
+                <span class="font-mono font-semibold">Product</span> holds domain state. Scrapers only handle extraction. <span class="font-mono">PriceComparisonEngine</span> only coordinates aggregation &amp; sorting.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
+              <span class="font-extrabold text-xs text-emerald-700">O &bull; Open / Closed Principle</span>
+              <p class="text-[11px] text-slate-600">
+                New scrapers (e.g. Amazon, TikTok Shop) can be registered at runtime via <span class="font-mono">registerScraper()</span> with zero modifications to existing classes.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
+              <span class="font-extrabold text-xs text-amber-700">L &bull; Liskov Substitution</span>
+              <p class="text-[11px] text-slate-600">
+                All scraper subclasses seamlessly replace <span class="font-mono">BaseScraper</span> without altering the correctness or contract expected by the engine.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
+              <span class="font-extrabold text-xs text-purple-700">I &bull; Interface Segregation</span>
+              <p class="text-[11px] text-slate-600">
+                Scrapers only implement the methods they need (<span class="font-mono">fetch</span> &amp; <span class="font-mono">parse</span>), keeping interfaces minimal and uncluttered.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1 sm:col-span-2">
+              <span class="font-extrabold text-xs text-blue-700">D &bull; Dependency Inversion</span>
+              <p class="text-[11px] text-slate-600">
+                The high-level engine depends upon abstractions (<span class="font-mono">BaseScraper</span> and <span class="font-mono">ICurrencyConverter</span>) rather than concrete platforms or hardcoded exchange rates.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Tab 4: Live Execution Trace -->
+        <div id="tab-live" class="modal-tab-content space-y-3 hidden">
+          <div class="p-4 bg-slate-950 text-emerald-400 font-mono text-xs rounded-2xl shadow-inner space-y-1.5 max-h-72 overflow-y-auto" id="live-console-log">
+            <div class="text-slate-500">// Real-time OOAD execution lifecycle logs...</div>
+          </div>
+          <button type="button" id="clear-trace-btn" class="text-xs text-slate-500 hover:text-slate-700 font-semibold underline">
+            Clear Logs
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button type="button" id="close-modal-bottom-btn" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition">
+          Close Guide
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: EMBEDDED OBJECT-ORIENTED SIMULATION (VANILLA ES6) -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * ========================================================================
+     * OOP SIMULATION: Mimicking Python OOAD Architecture in JavaScript
+     * ========================================================================
+     */
+
+    // Logger utility for the Live Execution Trace Tab
+    const ExecutionLogger = {
+      logs: [],
+      log(message, type = 'info') {
+        const time = new Date().toLocaleTimeString();
+        const entry = `[${time}] ${message}`;
+        this.logs.push(entry);
+        console.log(entry);
+
+        const consoleEl = document.getElementById('live-console-log');
+        if (consoleEl) {
+          const line = document.createElement('div');
+          line.className = type === 'error' ? 'text-rose-400' : (type === 'template' ? 'text-amber-300' : 'text-emerald-400');
+          line.textContent = entry;
+          consoleEl.appendChild(line);
+          consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+      },
+      clear() {
+        this.logs = [];
+        const consoleEl = document.getElementById('live-console-log');
+        if (consoleEl) {
+          consoleEl.innerHTML = '<div class="text-slate-500">// Real-time OOAD execution lifecycle logs...</div>';
+        }
+      }
+    };
+
+    /**
+     * 1. DOMAIN MODEL: Product
+     * Encapsulates product attributes and validation invariants.
+     */
+    class Product {
+      constructor({ name, price, currency, platform, url, inStock, originalPrice = null, imageUrl = null }) {
+        if (!name || !name.trim()) throw new Error("Product name cannot be empty.");
+        if (price < 0) throw new Error(`Product price cannot be negative: ${price}`);
+        if (!currency || currency.length !== 3) throw new Error(`Invalid currency code: ${currency}`);
+
+        this.name = name.trim();
+        this.price = Number(price);
+        this.currency = currency.toUpperCase();
+        this.platform = platform;
+        this.url = url;
+        this.inStock = Boolean(inStock);
+        this.scrapedAt = new Date();
+        this.originalPrice = originalPrice ? Number(originalPrice) : this.price;
+        this.imageUrl = imageUrl;
+      }
+
+      get discountPercent() {
+        if (this.originalPrice > this.price) {
+          return Math.round(((this.originalPrice - this.price) / this.originalPrice) * 100);
+        }
+        return 0;
+      }
+
+      formattedPrice() {
+        const symbols = { THB: '฿', USD: '$', EUR: '€', GBP: '£', JPY: '¥' };
+        const sym = symbols[this.currency] || `${this.currency} `;
+        return `${sym}${this.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+    }
+
+    /**
+     * 2. CURRENCY CONVERTER SERVICE (Dependency Inversion & SRP)
+     * Handles normalization between exchange rates using USD as pivot.
+     */
+    class FixedRateCurrencyConverter {
+      constructor(ratesToUsd = null) {
+        this.ratesToUsd = {
+          USD: 1.0,
+          THB: 36.50,
+          EUR: 0.92,
+          GBP: 0.79,
+          JPY: 155.00,
+        };
+        if (ratesToUsd) {
+          Object.assign(this.ratesToUsd, ratesToUsd);
+        }
+      }
+
+      convert(amount, fromCurrency, toCurrency) {
+        const from = fromCurrency.toUpperCase();
+        const to = toCurrency.toUpperCase();
+        if (from === to) return amount;
+        if (!this.ratesToUsd[from] || !this.ratesToUsd[to]) {
+          throw new Error(`Unsupported currency conversion: ${from} to ${to}`);
+        }
+        const rate = this.ratesToUsd[to] / this.ratesToUsd[from];
+        return Math.round((amount * rate) * 100) / 100;
+      }
+    }
+
+    /**
+     * 3. ABSTRACT BASE SCRAPER (Template Method Pattern)
+     * Enforces the scrape() lifecycle: fetch -> parse -> validate.
+     */
+    class BaseScraper {
+      constructor() {
+        if (this.constructor === BaseScraper) {
+          throw new Error("BaseScraper is abstract and cannot be instantiated directly.");
+        }
+      }
+
+      get platformName() {
+        throw new Error("Getter 'platformName' must be implemented by subclass.");
+      }
+
+      get baseUrl() {
+        throw new Error("Getter 'baseUrl' must be implemented by subclass.");
+      }
+
+      fetch(keyword) {
+        throw new Error("Method 'fetch()' must be implemented by subclass.");
+      }
+
+      parse(rawData) {
+        throw new Error("Method 'parse()' must be implemented by subclass.");
+      }
+
+      validate(products) {
+        // Concrete validation hook
+        return products.filter(item => {
+          if (!(item instanceof Product)) return false;
+          if (item.price <= 0 || isNaN(item.price)) return false;
+          if (!item.name || !item.name.trim()) return false;
+          if (!item.url) return false;
+          return true;
+        });
+      }
+
+      // The Template Method Pattern
+      scrape(keyword) {
+        ExecutionLogger.log(`[${this.platformName}] > Executing Template Method scrape("${keyword}")`, 'template');
+        
+        // Step 1: Fetch
+        const rawData = this.fetch(keyword);
+        ExecutionLogger.log(`[${this.platformName}] 1. fetch() returned ${rawData.length} raw records.`);
+
+        // Step 2: Parse
+        const parsed = this.parse(rawData);
+        ExecutionLogger.log(`[${this.platformName}] 2. parse() constructed ${parsed.length} Product entities.`);
+
+        // Step 3: Validate
+        const validated = this.validate(parsed);
+        ExecutionLogger.log(`[${this.platformName}] 3. validate() verified ${validated.length} domain models.`);
+
+        return validated;
+      }
+    }
+
+    /**
+     * 4. CONCRETE SCRAPER: MockShopeeScraper
+     * Simulates Shopee JSON API with prices in Satang.
+     */
+    class MockShopeeScraper extends BaseScraper {
+      constructor() {
+        super();
+        this._platformName = "Shopee";
+        this._baseUrl = "https://shopee.co.th";
+
+        this._catalog = [
+          {
+            item_id: "sp_101",
+            item_name: "Sony WH-1000XM5 Wireless Noise-Canceling Headphones (Black)",
+            price_satang: 1199000,
+            orig_satang: 1399000,
+            currency: "THB",
+            stock_count: 14,
+            slug: "sony-wh-1000xm5-sp101"
+          },
+          {
+            item_id: "sp_102",
+            item_name: "Apple AirPods Pro (2nd Generation) with MagSafe Case (USB-C)",
+            price_satang: 789000,
+            orig_satang: 899000,
+            currency: "THB",
+            stock_count: 8,
+            slug: "apple-airpods-pro-2-sp102"
+          },
+          {
+            item_id: "sp_103",
+            item_name: "Logitech MX Master 3S Wireless Performance Mouse (Graphite)",
+            price_satang: 339000,
+            orig_satang: 399000,
+            currency: "THB",
+            stock_count: 0, // Out of stock
+            slug: "logitech-mx-master-3s-sp103"
+          },
+          {
+            item_id: "sp_104",
+            item_name: "Keychron K2 V2 Wireless Mechanical Keyboard (Gateron Brown)",
+            price_satang: 285000,
+            orig_satang: 329000,
+            currency: "THB",
+            stock_count: 5,
+            slug: "keychron-k2-v2-sp104"
+          },
+          {
+            item_id: "sp_105",
+            item_name: "Samsung Galaxy Tab S9 128GB Wi-Fi (Graphite)",
+            price_satang: 2490000,
+            orig_satang: 2890000,
+            currency: "THB",
+            stock_count: 3,
+            slug: "samsung-galaxy-tab-s9-sp105"
+          }
+        ];
+      }
+
+      get platformName() { return this._platformName; }
+      get baseUrl() { return this._baseUrl; }
+
+      fetch(keyword) {
+        const terms = keyword.toLowerCase().split(/\s+/);
+        return this._catalog.filter(item => {
+          const name = item.item_name.toLowerCase();
+          return terms.some(t => name.includes(t));
+        });
+      }
+
+      parse(rawData) {
+        return rawData.map(raw => new Product({
+          name: raw.item_name,
+          price: Math.round((raw.price_satang / 100) * 100) / 100,
+          originalPrice: Math.round((raw.orig_satang / 100) * 100) / 100,
+          currency: raw.currency,
+          platform: this.platformName,
+          url: `${this.baseUrl}/product/${raw.slug}`,
+          inStock: raw.stock_count > 0,
+        }));
+      }
+    }
+
+    /**
+     * 5. CONCRETE SCRAPER: MockLazadaScraper
+     * Simulates Lazada with string floats and cross-border USD pricing.
+     */
+    class MockLazadaScraper extends BaseScraper {
+      constructor() {
+        super();
+        this._platformName = "Lazada";
+        this._baseUrl = "https://www.lazada.co.th";
+
+        this._catalog = [
+          {
+            nid: "laz_8801",
+            title: "Sony WH-1000XM5 Premium Noise Cancelling Headphones",
+            sale_price: "11450.00",
+            orig_price: "13500.00",
+            currency_code: "THB",
+            is_available: true,
+            sku_path: "products/sony-wh-1000xm5-i8801.html"
+          },
+          {
+            nid: "laz_8802",
+            title: "Apple AirPods Pro (2nd Gen) with USB-C MagSafe Case",
+            sale_price: "219.00", // USD listing
+            orig_price: "249.00",
+            currency_code: "USD",
+            is_available: true,
+            sku_path: "products/apple-airpods-pro-2-i8802.html"
+          },
+          {
+            nid: "laz_8803",
+            title: "Logitech MX Master 3S Wireless Mouse Quiet Clicks",
+            sale_price: "3190.00",
+            orig_price: "3790.00",
+            currency_code: "THB",
+            is_available: true,
+            sku_path: "products/logitech-mx-master-3s-i8803.html"
+          },
+          {
+            nid: "laz_8804",
+            title: "Keychron K2 V2 Wireless Mechanical Keyboard Hot-Swappable",
+            sale_price: "2990.00",
+            orig_price: "3390.00",
+            currency_code: "THB",
+            is_available: true,
+            sku_path: "products/keychron-k2-v2-i8804.html"
+          },
+          {
+            nid: "laz_8805",
+            title: "Samsung Galaxy Tab S9 128GB Wi-Fi Tablet",
+            sale_price: "24500.00",
+            orig_price: "27900.00",
+            currency_code: "THB",
+            is_available: true,
+            sku_path: "products/samsung-galaxy-tab-s9-i8805.html"
+          }
+        ];
+      }
+
+      get platformName() { return this._platformName; }
+      get baseUrl() { return this._baseUrl; }
+
+      fetch(keyword) {
+        const terms = keyword.toLowerCase().split(/\s+/);
+        return this._catalog.filter(item => {
+          const title = item.title.toLowerCase();
+          return terms.some(t => title.includes(t));
+        });
+      }
+
+      parse(rawData) {
+        return rawData.map(raw => new Product({
+          name: raw.title,
+          price: parseFloat(raw.sale_price) || 0,
+          originalPrice: parseFloat(raw.orig_price) || 0,
+          currency: raw.currency_code,
+          platform: this.platformName,
+          url: `${this.baseUrl}/${raw.sku_path}`,
+          inStock: Boolean(raw.is_available),
+        }));
+      }
+    }
+
+    /**
+     * 6. CONCRETE SCRAPER: MockAmazonScraper
+     * Demonstrates Open/Closed Principle (Runtime Extension).
+     */
+    class MockAmazonScraper extends BaseScraper {
+      constructor() {
+        super();
+        this._platformName = "Amazon";
+        this._baseUrl = "https://www.amazon.com";
+
+        this._catalog = [
+          {
+            asin: "B09XS7JWHH",
+            title: "Sony WH-1000XM5 Wireless Noise Canceling Headphones (Silver)",
+            price_usd: 328.00, // ~11,972 THB
+            orig_usd: 399.99,
+            in_stock: true
+          },
+          {
+            asin: "B0BDHWDR12",
+            title: "Apple AirPods Pro (2nd Gen) with MagSafe Charging Case",
+            price_usd: 199.00, // ~7,263.50 THB - Best Deal!
+            orig_usd: 249.00,
+            in_stock: true
+          },
+          {
+            asin: "B09HM94VDS",
+            title: "Logitech MX Master 3S Bluetooth Mouse (Space Gray)",
+            price_usd: 89.00, // ~3,248.50 THB
+            orig_usd: 99.99,
+            in_stock: true
+          },
+          {
+            asin: "B0875X346W",
+            title: "Keychron K2 Wireless Bluetooth Mechanical Gaming Keyboard",
+            price_usd: 79.99, // ~2,919.63 THB
+            orig_usd: 89.99,
+            in_stock: true
+          },
+          {
+            asin: "B0C79Y5WJ4",
+            title: "Samsung Galaxy Tab S9 11\" 128GB Android Tablet",
+            price_usd: 679.99, // ~24,819.63 THB
+            orig_usd: 799.99,
+            in_stock: true
+          }
+        ];
+      }
+
+      get platformName() { return this._platformName; }
+      get baseUrl() { return this._baseUrl; }
+
+      fetch(keyword) {
+        const terms = keyword.toLowerCase().split(/\s+/);
+        return this._catalog.filter(item => {
+          const t = item.title.toLowerCase();
+          return terms.some(term => t.includes(term));
+        });
+      }
+
+      parse(rawData) {
+        return rawData.map(raw => new Product({
+          name: raw.title,
+          price: raw.price_usd,
+          originalPrice: raw.orig_usd,
+          currency: "USD",
+          platform: this.platformName,
+          url: `${this.baseUrl}/dp/${raw.asin}`,
+          inStock: raw.in_stock,
+        }));
+      }
+    }
+
+    /**
+     * 7. PRICE COMPARISON ENGINE (Composition & Dependency Injection)
+     * Coordinates scrapers, converts currencies, and ranks products.
+     */
+    class PriceComparisonEngine {
+      constructor(scrapers = [], converter = new FixedRateCurrencyConverter(), targetCurrency = "THB") {
+        this.scrapers = new Map();
+        this.converter = converter;
+        this.targetCurrency = targetCurrency;
+
+        scrapers.forEach(s => this.registerScraper(s));
+      }
+
+      registerScraper(scraper) {
+        if (!(scraper instanceof BaseScraper)) {
+          throw new TypeError("Registered scraper must inherit from BaseScraper");
+        }
+        this.scrapers.set(scraper.platformName.toLowerCase(), scraper);
+        ExecutionLogger.log(`Registered platform scraper: '${scraper.platformName}'`);
+      }
+
+      unregisterScraper(platformName) {
+        return this.scrapers.delete(platformName.toLowerCase());
+      }
+
+      getRegisteredScrapers() {
+        return Array.from(this.scrapers.values());
+      }
+
+      compare(keyword, options = {}) {
+        const { inStockOnly = false, maxPrice = Infinity, enabledPlatforms = null } = options;
+        if (!keyword || !keyword.trim()) {
+          return { items: [], stats: { min: 0, max: 0, avg: 0, count: 0, inStock: 0 }, bestDeal: null };
+        }
+
+        ExecutionLogger.log(`>>> Starting aggregation for query: "${keyword}" (Target: ${this.targetCurrency})`);
+        const allItems = [];
+
+        this.scrapers.forEach(scraper => {
+          // Check if platform is active in filters
+          if (enabledPlatforms && !enabledPlatforms.includes(scraper.platformName.toLowerCase())) {
+            return;
+          }
+
+          try {
+            const products = scraper.scrape(keyword);
+            products.forEach(product => {
+              if (inStockOnly && !product.inStock) return;
+
+              // Currency Normalization
+              const normalizedPrice = this.converter.convert(
+                product.price,
+                product.currency,
+                this.targetCurrency
+              );
+
+              // Max price ceiling check
+              if (normalizedPrice > maxPrice) return;
+
+              allItems.push({
+                product,
+                normalizedPrice,
+                targetCurrency: this.targetCurrency,
+                formattedNormalizedPrice: `${this.targetCurrency === 'THB' ? '฿' : (this.targetCurrency === 'USD' ? '$' : '€')}${normalizedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              });
+            });
+          } catch (err) {
+            ExecutionLogger.log(`Error scraping ${scraper.platformName}: ${err.message}`, 'error');
+          }
+        });
+
+        // Lowest-to-highest sorting
+        allItems.sort((a, b) => a.normalizedPrice - b.normalizedPrice);
+
+        // Compute metrics
+        const inStockItems = allItems.filter(item => item.product.inStock);
+        const bestDeal = inStockItems.length > 0 ? inStockItems[0] : (allItems.length > 0 ? allItems[0] : null);
+
+        const prices = allItems.map(i => i.normalizedPrice);
+        const minPrice = prices.length ? Math.min(...prices) : 0;
+        const maxPriceFound = prices.length ? Math.max(...prices) : 0;
+        const avgPrice = prices.length ? Math.round((prices.reduce((a, b) => a + b, 0) / prices.length) * 100) / 100 : 0;
+
+        return {
+          keyword,
+          targetCurrency: this.targetCurrency,
+          items: allItems,
+          bestDeal,
+          stats: {
+            min: minPrice,
+            max: maxPriceFound,
+            avg: avgPrice,
+            count: allItems.length,
+            inStock: inStockItems.length
+          }
+        };
+      }
+    }
+
+    /**
+     * ========================================================================
+     * APPLICATION CONTROLLER & UI BINDINGS
+     * ========================================================================
+     */
+    let engine;
+    let shopeeScraper;
+    let lazadaScraper;
+    let amazonScraper;
+    let currentComparisonResult = null;
+
+    function initApp() {
+      // 1. Dependency Injection setup
+      const converter = new FixedRateCurrencyConverter();
+      shopeeScraper = new MockShopeeScraper();
+      lazadaScraper = new MockLazadaScraper();
+      amazonScraper = new MockAmazonScraper();
+
+      engine = new PriceComparisonEngine(
+        [shopeeScraper, lazadaScraper, amazonScraper],
+        converter,
+        "THB"
+      );
+
+      // 2. Setup Event Listeners
+      setupEventListeners();
+
+      // 3. Trigger initial search
+      performSearch("Sony");
+
+      // 4. Initialize Lucide Icons
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function setupEventListeners() {
+      // Search form
+      const searchForm = document.getElementById('search-form');
+      const searchInput = document.getElementById('search-input');
+      const clearBtn = document.getElementById('clear-search-btn');
+
+      searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        performSearch(searchInput.value);
+      });
+
+      searchInput.addEventListener('input', () => {
+        clearBtn.classList.toggle('hidden', !searchInput.value);
+      });
+
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.classList.add('hidden');
+        searchInput.focus();
+      });
+
+      // Quick tags
+      document.querySelectorAll('.preset-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const query = tag.getAttribute('data-query');
+          searchInput.value = query;
+          clearBtn.classList.remove('hidden');
+          performSearch(query);
+        });
+      });
+
+      // Currency Buttons
+      document.querySelectorAll('.currency-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cur = btn.getAttribute('data-currency');
+          document.querySelectorAll('.currency-btn').forEach(b => {
+            b.className = 'currency-btn py-1.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold text-center hover:bg-slate-50 transition';
+          });
+          btn.className = 'currency-btn py-1.5 px-3 rounded-xl border border-indigo-600 bg-indigo-50 text-indigo-700 text-xs font-bold text-center transition';
+
+          engine.targetCurrency = cur;
+          performSearch(searchInput.value);
+        });
+      });
+
+      // Slider & Filters
+      const slider = document.getElementById('price-range-slider');
+      const sliderLabel = document.getElementById('price-slider-label');
+      const stockToggle = document.getElementById('stock-filter');
+      const sortSelect = document.getElementById('sort-select');
+
+      slider.addEventListener('input', () => {
+        const sym = engine.targetCurrency === 'THB' ? '฿' : (engine.targetCurrency === 'USD' ? '$' : '€');
+        sliderLabel.textContent = `${sym}${Number(slider.value).toLocaleString()}`;
+        performSearch(searchInput.value);
+      });
+
+      stockToggle.addEventListener('change', () => performSearch(searchInput.value));
+      sortSelect.addEventListener('change', () => renderProducts());
+
+      // Platform Checkboxes
+      document.querySelectorAll('.platform-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => performSearch(searchInput.value));
+      });
+
+      // Reset Button
+      document.getElementById('reset-filters-btn').addEventListener('click', () => {
+        document.getElementById('platform-shopee').checked = true;
+        document.getElementById('platform-lazada').checked = true;
+        document.getElementById('platform-amazon').checked = true;
+        stockToggle.checked = false;
+        slider.value = 35000;
+        const sym = engine.targetCurrency === 'THB' ? '฿' : (engine.targetCurrency === 'USD' ? '$' : '€');
+        sliderLabel.textContent = `${sym}35,000`;
+        sortSelect.value = 'price-asc';
+        performSearch(searchInput.value || "Sony");
+      });
+
+      // Architecture Modal
+      const modal = document.getElementById('architecture-modal');
+      const modalCard = document.getElementById('modal-card');
+      const openModalBtn = document.getElementById('open-architecture-btn');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const closeModalBottomBtn = document.getElementById('close-modal-bottom-btn');
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          modalCard.classList.remove('scale-95');
+        }, 10);
+      }
+
+      function closeModal() {
+        modal.classList.add('opacity-0');
+        modalCard.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+      }
+
+      openModalBtn.addEventListener('click', openModal);
+      closeModalBtn.addEventListener('click', closeModal);
+      closeModalBottomBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      // Modal Tabs
+      document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabId = btn.getAttribute('data-tab');
+          document.querySelectorAll('.modal-tab-btn').forEach(b => {
+            b.className = 'modal-tab-btn px-4 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5';
+          });
+          btn.className = 'modal-tab-btn px-4 py-3 border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-1.5';
+
+          document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.add('hidden'));
+          document.getElementById(tabId).classList.remove('hidden');
+        });
+      });
+
+      // Clear Live Logs
+      document.getElementById('clear-trace-btn').addEventListener('click', () => ExecutionLogger.clear());
+    }
+
+    function getEnabledPlatforms() {
+      const enabled = [];
+      if (document.getElementById('platform-shopee').checked) enabled.push('shopee');
+      if (document.getElementById('platform-lazada').checked) enabled.push('lazada');
+      if (document.getElementById('platform-amazon').checked) enabled.push('amazon');
+      return enabled;
+    }
+
+    function performSearch(query) {
+      if (!query || !query.trim()) return;
+
+      const inStockOnly = document.getElementById('stock-filter').checked;
+      const maxPrice = Number(document.getElementById('price-range-slider').value);
+      const enabledPlatforms = getEnabledPlatforms();
+
+      currentComparisonResult = engine.compare(query, {
+        inStockOnly,
+        maxPrice,
+        enabledPlatforms
+      });
+
+      updateMetrics();
+      renderProducts();
+    }
+
+    function updateMetrics() {
+      const res = currentComparisonResult;
+      const sym = res.targetCurrency === 'THB' ? '฿' : (res.targetCurrency === 'USD' ? '$' : '€');
+
+      document.getElementById('query-display-label').textContent = `"${res.keyword}"`;
+      document.getElementById('results-count-badge').textContent = `${res.stats.count} items`;
+
+      // Metric 1: Cheapest
+      if (res.bestDeal) {
+        document.getElementById('metric-cheapest').textContent = res.bestDeal.formattedNormalizedPrice;
+        document.getElementById('metric-cheapest-store').innerHTML = `Best price on <span class="font-bold text-slate-800">${res.bestDeal.product.platform}</span>`;
+      } else {
+        document.getElementById('metric-cheapest').textContent = `${sym}0.00`;
+        document.getElementById('metric-cheapest-store').textContent = 'No matching items';
+      }
+
+      // Metric 2: Average
+      document.getElementById('metric-average').textContent = `${sym}${res.stats.avg.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+      // Metric 3: Highest & Savings
+      document.getElementById('metric-highest').textContent = `${sym}${res.stats.max.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      const savings = Math.max(0, res.stats.max - res.stats.min);
+      document.getElementById('metric-savings').textContent = savings > 0 
+        ? `Save up to ${sym}${savings.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+        : 'Uniform pricing';
+
+      // Metric 4: Platforms
+      const enabledCount = getEnabledPlatforms().length;
+      document.getElementById('metric-stores').textContent = `${enabledCount} Stores`;
+      document.getElementById('metric-inventory').textContent = `${res.stats.inStock} in-stock (${res.stats.count} total)`;
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('products-container');
+      const emptyState = document.getElementById('empty-state');
+      const sortType = document.getElementById('sort-select').value;
+      const res = currentComparisonResult;
+
+      if (!res || res.items.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      // Sorting logic
+      const sorted = [...res.items];
+      if (sortType === 'price-asc') {
+        sorted.sort((a, b) => a.normalizedPrice - b.normalizedPrice);
+      } else if (sortType === 'price-desc') {
+        sorted.sort((a, b) => b.normalizedPrice - a.normalizedPrice);
+      } else if (sortType === 'discount-desc') {
+        sorted.sort((a, b) => b.product.discountPercent - a.product.discountPercent);
+      } else if (sortType === 'name-asc') {
+        sorted.sort((a, b) => a.product.name.localeCompare(b.product.name));
+      }
+
+      const bestDealId = res.bestDeal ? `${res.bestDeal.product.platform}_${res.bestDeal.product.name}` : null;
+
+      container.innerHTML = sorted.map((item, index) => {
+        const p = item.product;
+        const isBestDeal = bestDealId === `${p.platform}_${p.name}`;
+        const currencyDiffers = p.currency !== res.targetCurrency;
+
+        // Platform design tokens
+        let platformColor = 'bg-slate-100 text-slate-800 border-slate-200';
+        let platformBadgeDot = 'bg-slate-400';
+        let btnColor = 'bg-slate-800 hover:bg-slate-900 text-white';
+
+        if (p.platform === 'Shopee') {
+          platformColor = 'bg-orange-50 text-shopee border-orange-200';
+          platformBadgeDot = 'bg-shopee';
+          btnColor = 'bg-shopee hover:bg-shopee-dark text-white shadow-orange-100';
+        } else if (p.platform === 'Lazada') {
+          platformColor = 'bg-blue-50 text-lazada border-blue-200';
+          platformBadgeDot = 'bg-lazada';
+          btnColor = 'bg-lazada hover:bg-slate-900 text-white shadow-blue-100';
+        } else if (p.platform === 'Amazon') {
+          platformColor = 'bg-amber-50 text-amber-800 border-amber-200';
+          platformBadgeDot = 'bg-amazon';
+          btnColor = 'bg-amber-500 hover:bg-amber-600 text-slate-900 shadow-amber-100 font-bold';
+        }
+
+        return `
+          <div class="bg-white border ${isBestDeal ? 'border-emerald-500 best-deal-glow ring-2 ring-emerald-500/30' : 'border-slate-200 hover:border-slate-300'} rounded-2xl p-4 sm:p-5 shadow-sm transition hover:shadow-md relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            ${isBestDeal ? `
+              <div class="absolute -top-1 -right-1 bg-gradient-to-l from-emerald-500 to-teal-600 text-white font-extrabold text-[10px] uppercase tracking-wider px-3.5 py-1 rounded-bl-xl shadow-sm flex items-center gap-1.5 z-10 animate-badge">
+                <i data-lucide="crown" class="w-3.5 h-3.5"></i>
+                <span>Best Deal</span>
+              </div>
+            ` : ''}
+
+            <!-- Left: Platform Badge & Product Info -->
+            <div class="flex-1 space-y-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${platformColor}">
+                  <span class="w-2 h-2 rounded-full ${platformBadgeDot}"></span>
+                  ${p.platform}
+                </span>
+
+                ${p.inStock ? `
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    In Stock
+                  </span>
+                ` : `
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    Out of Stock
+                  </span>
+                `}
+
+                ${p.discountPercent > 0 ? `
+                  <span class="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
+                    -${p.discountPercent}% OFF
+                  </span>
+                ` : ''}
+              </div>
+
+              <h4 class="text-sm sm:text-base font-bold text-slate-900 leading-snug hover:text-indigo-600 transition">
+                <a href="${p.url}" target="_blank" rel="noopener noreferrer">${p.name}</a>
+              </h4>
+
+              <div class="flex items-center gap-4 text-[11px] text-slate-500">
+                <span class="flex items-center gap-1">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-slate-400"></i> Verified Seller
+                </span>
+                <span>&bull;</span>
+                <span class="flex items-center gap-1 font-mono text-[10px]">
+                  Scraped: ${new Date(p.scrapedAt).toLocaleTimeString()}
+                </span>
+              </div>
+            </div>
+
+            <!-- Right: Price Breakdown & Action -->
+            <div class="flex items-center md:flex-col md:items-end justify-between md:justify-center border-t md:border-t-0 pt-3 md:pt-0 border-slate-100 shrink-0 gap-2">
+              <div class="text-left md:text-right">
+                <div class="flex items-baseline gap-1.5 md:justify-end">
+                  <span class="text-lg sm:text-2xl font-extrabold ${isBestDeal ? 'text-emerald-600' : 'text-slate-900'} tracking-tight">
+                    ${item.formattedNormalizedPrice}
+                  </span>
+                </div>
+
+                ${currencyDiffers ? `
+                  <p class="text-[11px] text-slate-500 font-medium">
+                    (Orig: <span class="font-mono">${p.formattedPrice()}</span>)
+                  </p>
+                ` : ''}
+
+                ${p.originalPrice > p.price ? `
+                  <p class="text-[11px] text-slate-400 line-through">
+                    ${p.currency} ${p.originalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </p>
+                ` : ''}
+              </div>
+
+              <a 
+                href="${p.url}" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition active:scale-95 flex items-center gap-1.5 ${btnColor}"
+              >
+                <span>View Deal</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+
+      // Refresh Lucide Icons on dynamic HTML
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    // Start Application upon DOM Ready
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+
+</body>
+</html>
