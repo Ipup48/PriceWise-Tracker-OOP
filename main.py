@@ -318,7 +318,7 @@ class MockAmazonScraper(BaseScraper):
                 price=float(raw["price_usd"]),
                 currency="USD",
                 platform=self.platform_name,
-                url=f"{self.base_url}/dp/{raw['asin']}",
+                url=f"{self.base_url}/s?k={raw['title'].replace(' ', '+')[:60]}",
                 in_stock=raw["is_prime_in_stock"],
             )
             for raw in raw_data
