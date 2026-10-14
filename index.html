@@ -99,8 +99,8 @@
             <input 
               type="text" 
               id="search-input" 
-              placeholder="ค้นหาสินค้า เช่น Sony, iPad, iPhone, PS5, Switch, Dyson..." 
-              value="Sony"
+              placeholder="ค้นหาสินค้า เช่น Sony WH-1000XM5, AirPods Pro, iPhone 15..." 
+              autocomplete="off"
               class="w-full pl-10 pr-24 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition placeholder:text-slate-400"
             />
             <div class="absolute right-1.5 flex items-center gap-1">
@@ -118,6 +118,11 @@
               >
                 <span>ค้นหา</span>
               </button>
+            </div>
+
+            <!-- Autocomplete Dropdown -->
+            <div id="autocomplete-dropdown" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden max-h-72 overflow-y-auto">
+              <div id="autocomplete-list"></div>
             </div>
           </form>
         </div>
@@ -137,44 +142,24 @@
 
       </div>
 
-      <!-- แถบค้นหาด่วน (Quick Preset Tags) หลากหลายหมวดหมู่ -->
-      <div class="pb-2.5 pt-0.5 flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar border-t border-slate-100">
-        <span class="text-slate-600 text-[11px] font-medium shrink-0 flex items-center gap-1 mr-1">
-          <i data-lucide="sparkles" class="w-3 h-3 text-amber-500"></i> ยอดนิยม:
-        </span>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="Sony">
-          🎧 Sony
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="AirPods">
-          🍎 AirPods
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="iPad">
-          📱 iPad
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="iPhone">
-          📱 iPhone
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="PlayStation">
-          🎮 PS5
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="Switch">
-          🎮 Switch
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="MacBook">
-          💻 MacBook
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="Logitech">
-          🖱️ Logitech
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="Dyson">
-          💨 Dyson
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="DJI">
-          📷 DJI
-        </button>
-        <button type="button" class="preset-tag px-2.5 py-0.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 transition shrink-0" data-query="Xiaomi">
-          🧹 Xiaomi
-        </button>
+      <!-- แถบสินค้าแยกตามหมวดหมู่ (2-Level: Category → Product) -->
+      <div class="pb-3 pt-1 border-t border-slate-100" id="product-nav-bar">
+        <!-- แถวหมวดหมู่ -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5">
+          <span class="text-slate-400 shrink-0 flex items-center mr-0.5">
+            <i data-lucide="grid-3x3" class="w-3.5 h-3.5 text-indigo-400"></i>
+          </span>
+          <button type="button" class="cat-btn active-cat shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition whitespace-nowrap" data-cat="audio">🎧 หูฟัง</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="computer">💻 คอมฯ & Gadget</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="mobile">📱 มือถือ & แท็บเล็ต</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="gaming">🎮 เกมมิ่ง</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="watch">⌚ สมาร์ทวอทช์</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="camera">📷 กล้อง & ไลฟ์สไตล์</button>
+        </div>
+        <!-- แถวสินค้าย่อย (เปลี่ยนตามหมวดที่เลือก) -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5" id="product-tag-row">
+          <!-- JS inject here -->
+        </div>
       </div>
     </div>
   </header>
@@ -727,42 +712,42 @@
 
         this._catalog = [
           // 1. หูฟัง & ระบบเสียง
-          { item_id: "sp_101", item_name: "Sony WH-1000XM5 หูฟังไร้สายตัดเสียงรบกวน (สีดำ)", price_satang: 1199000, orig_satang: 1399000, currency: "THB", stock_count: 14, slug: "sony-wh-1000xm5-sp101" },
-          { item_id: "sp_102", item_name: "Apple AirPods Pro (รุ่นที่ 2) พร้อมเคสชาร์จ MagSafe (USB-C)", price_satang: 789000, orig_satang: 899000, currency: "THB", stock_count: 8, slug: "apple-airpods-pro-2-sp102" },
-          { item_id: "sp_106", item_name: "Bose QuietComfort 45 หูฟังไร้สายตัดเสียงรบกวน", price_satang: 1050000, orig_satang: 1190000, currency: "THB", stock_count: 6, slug: "bose-qc-45-sp106" },
-          { item_id: "sp_107", item_name: "Marshall Major IV หูฟังบลูทูธไร้สาย แบตเตอรี่ 80 ชั่วโมง", price_satang: 479000, orig_satang: 549000, currency: "THB", stock_count: 12, slug: "marshall-major-iv-sp107" },
-          { item_id: "sp_108", item_name: "Marshall Emberton II ลำโพงบลูทูธพกพา พลังเสียงรอบทิศทาง", price_satang: 599000, orig_satang: 699000, currency: "THB", stock_count: 9, slug: "marshall-emberton-ii-sp108" },
-          { item_id: "sp_109", item_name: "Shure SM7B ไมโครโฟนไดนามิกระดับสตูดิโอ สำหรับพอดแคสต์และสตรีมมิ่ง", price_satang: 1420000, orig_satang: 1650000, currency: "THB", stock_count: 4, slug: "shure-sm7b-sp109" },
+          { item_id: "sp_101", item_name: "Sony WH-1000XM5 หูฟังไร้สายตัดเสียงรบกวน (สีดำ)", price_satang: 1199000, orig_satang: 1399000, currency: "THB", stock_count: 14, url: "https://shopee.co.th/search?keyword=Sony+WH-1000XM5" },
+          { item_id: "sp_102", item_name: "Apple AirPods Pro (รุ่นที่ 2) พร้อมเคสชาร์จ MagSafe (USB-C)", price_satang: 789000, orig_satang: 899000, currency: "THB", stock_count: 8, url: "https://shopee.co.th/search?keyword=Apple+AirPods+Pro+2+USB-C" },
+          { item_id: "sp_106", item_name: "Bose QuietComfort 45 หูฟังไร้สายตัดเสียงรบกวน", price_satang: 1050000, orig_satang: 1190000, currency: "THB", stock_count: 6, url: "https://shopee.co.th/search?keyword=Bose+QuietComfort+45" },
+          { item_id: "sp_107", item_name: "Marshall Major IV หูฟังบลูทูธไร้สาย แบตเตอรี่ 80 ชั่วโมง", price_satang: 479000, orig_satang: 549000, currency: "THB", stock_count: 12, url: "https://shopee.co.th/search?keyword=Marshall+Major+IV" },
+          { item_id: "sp_108", item_name: "Marshall Emberton II ลำโพงบลูทูธพกพา พลังเสียงรอบทิศทาง", price_satang: 599000, orig_satang: 699000, currency: "THB", stock_count: 9, url: "https://shopee.co.th/search?keyword=Marshall+Emberton+II" },
+          { item_id: "sp_109", item_name: "Shure SM7B ไมโครโฟนไดนามิกระดับสตูดิโอ สำหรับพอดแคสต์และสตรีมมิ่ง", price_satang: 1420000, orig_satang: 1650000, currency: "THB", stock_count: 4, url: "https://shopee.co.th/search?keyword=Shure+SM7B" },
 
           // 2. คอมพิวเตอร์ & อุปกรณ์ต่อพ่วง
-          { item_id: "sp_103", item_name: "Logitech MX Master 3S เมาส์ไร้สายบลูทูธเพื่อการทำงาน (สี Graphite)", price_satang: 339000, orig_satang: 399000, currency: "THB", stock_count: 0, slug: "logitech-mx-master-3s-sp103" },
-          { item_id: "sp_104", item_name: "Keychron K2 V2 คีย์บอร์ดไร้สาย Mechanical Keyboard (Gateron Brown)", price_satang: 285000, orig_satang: 329000, currency: "THB", stock_count: 7, slug: "keychron-k2-v2-sp104" },
-          { item_id: "sp_110", item_name: "Apple MacBook Air 13 นิ้ว ชิป M2 (RAM 8GB / SSD 256GB)", price_satang: 3290000, orig_satang: 3690000, currency: "THB", stock_count: 5, slug: "macbook-air-m2-sp110" },
-          { item_id: "sp_111", item_name: "ASUS ROG Zephyrus G14 โน้ตบุ๊กเกมมิ่งสเปกแรง Ryzen 9", price_satang: 4990000, orig_satang: 5590000, currency: "THB", stock_count: 0, slug: "asus-rog-zephyrus-g14-sp111" },
-          { item_id: "sp_112", item_name: "Dell UltraSharp U2723QE จอมอนิเตอร์ 27 นิ้ว 4K IPS Black", price_satang: 1950000, orig_satang: 2290000, currency: "THB", stock_count: 3, slug: "dell-ultrasharp-u2723qe-sp112" },
-          { item_id: "sp_113", item_name: "Elgato Stream Deck MK.2 คอนโทรลเลอร์ควบคุมการสตรีม 15 ปุ่ม LCD", price_satang: 489000, orig_satang: 559000, currency: "THB", stock_count: 11, slug: "elgato-stream-deck-mk2-sp113" },
+          { item_id: "sp_103", item_name: "Logitech MX Master 3S เมาส์ไร้สายบลูทูธเพื่อการทำงาน (สี Graphite)", price_satang: 339000, orig_satang: 399000, currency: "THB", stock_count: 0, url: "https://shopee.co.th/search?keyword=Logitech+MX+Master+3S" },
+          { item_id: "sp_104", item_name: "Keychron K2 V2 คีย์บอร์ดไร้สาย Mechanical Keyboard (Gateron Brown)", price_satang: 285000, orig_satang: 329000, currency: "THB", stock_count: 7, url: "https://shopee.co.th/search?keyword=Keychron+K2+V2" },
+          { item_id: "sp_110", item_name: "Apple MacBook Air 13 นิ้ว ชิป M2 (RAM 8GB / SSD 256GB)", price_satang: 3290000, orig_satang: 3690000, currency: "THB", stock_count: 5, url: "https://shopee.co.th/search?keyword=MacBook+Air+M2+13" },
+          { item_id: "sp_111", item_name: "ASUS ROG Zephyrus G14 โน้ตบุ๊กเกมมิ่งสเปกแรง Ryzen 9", price_satang: 4990000, orig_satang: 5590000, currency: "THB", stock_count: 0, url: "https://shopee.co.th/search?keyword=ASUS+ROG+Zephyrus+G14" },
+          { item_id: "sp_112", item_name: "Dell UltraSharp U2723QE จอมอนิเตอร์ 27 นิ้ว 4K IPS Black", price_satang: 1950000, orig_satang: 2290000, currency: "THB", stock_count: 3, url: "https://shopee.co.th/search?keyword=Dell+UltraSharp+U2723QE" },
+          { item_id: "sp_113", item_name: "Elgato Stream Deck MK.2 คอนโทรลเลอร์ควบคุมการสตรีม 15 ปุ่ม LCD", price_satang: 489000, orig_satang: 559000, currency: "THB", stock_count: 11, url: "https://shopee.co.th/search?keyword=Elgato+Stream+Deck+MK2" },
 
           // 3. สมาร์ทโฟน & แท็บเล็ต
-          { item_id: "sp_105", item_name: "Samsung Galaxy Tab S9 128GB Wi-Fi แท็บเล็ต (สี Graphite)", price_satang: 2490000, orig_satang: 2890000, currency: "THB", stock_count: 4, slug: "samsung-galaxy-tab-s9-sp105" },
-          { item_id: "sp_114", item_name: "Apple iPad Air 5 (M1) 64GB Wi-Fi หน้าจอ Liquid Retina 10.9 นิ้ว", price_satang: 1890000, orig_satang: 2190000, currency: "THB", stock_count: 10, slug: "ipad-air-5-m1-sp114" },
-          { item_id: "sp_115", item_name: "Apple iPhone 15 Pro Max 256GB ไทเทเนียมธรรมชาติ", price_satang: 4150000, orig_satang: 4490000, currency: "THB", stock_count: 6, slug: "iphone-15-pro-max-256-sp115" },
-          { item_id: "sp_116", item_name: "Samsung Galaxy S24 Ultra 256GB กล้อง 200MP พร้อมปากกา S-Pen", price_satang: 4190000, orig_satang: 4690000, currency: "THB", stock_count: 5, slug: "galaxy-s24-ultra-256-sp116" },
-          { item_id: "sp_117", item_name: "Xiaomi 14 Pro 512GB สมาร์ทโฟนเลนส์กล้อง Leica Summilux", price_satang: 2890000, orig_satang: 3290000, currency: "THB", stock_count: 8, slug: "xiaomi-14-pro-512-sp117" },
+          { item_id: "sp_105", item_name: "Samsung Galaxy Tab S9 128GB Wi-Fi แท็บเล็ต (สี Graphite)", price_satang: 2490000, orig_satang: 2890000, currency: "THB", stock_count: 4, url: "https://shopee.co.th/search?keyword=Samsung+Galaxy+Tab+S9" },
+          { item_id: "sp_114", item_name: "Apple iPad Air 5 (M1) 64GB Wi-Fi หน้าจอ Liquid Retina 10.9 นิ้ว", price_satang: 1890000, orig_satang: 2190000, currency: "THB", stock_count: 10, url: "https://shopee.co.th/search?keyword=iPad+Air+5+M1+64GB" },
+          { item_id: "sp_115", item_name: "Apple iPhone 15 Pro Max 256GB ไทเทเนียมธรรมชาติ", price_satang: 4150000, orig_satang: 4490000, currency: "THB", stock_count: 6, url: "https://shopee.co.th/search?keyword=iPhone+15+Pro+Max+256GB" },
+          { item_id: "sp_116", item_name: "Samsung Galaxy S24 Ultra 256GB กล้อง 200MP พร้อมปากกา S-Pen", price_satang: 4190000, orig_satang: 4690000, currency: "THB", stock_count: 5, url: "https://shopee.co.th/search?keyword=Samsung+Galaxy+S24+Ultra" },
+          { item_id: "sp_117", item_name: "Xiaomi 14 Pro 512GB สมาร์ทโฟนเลนส์กล้อง Leica Summilux", price_satang: 2890000, orig_satang: 3290000, currency: "THB", stock_count: 8, url: "https://shopee.co.th/search?keyword=Xiaomi+14+Pro+512GB" },
 
           // 4. เกมมิ่งและคอนโซล
-          { item_id: "sp_118", item_name: "PlayStation 5 Slim (PS5) เครื่องเล่นเกมคอนโซล รุ่นใส่แผ่น", price_satang: 1749000, orig_satang: 1899000, currency: "THB", stock_count: 7, slug: "playstation-5-slim-disc-sp118" },
-          { item_id: "sp_119", item_name: "Nintendo Switch OLED Model คอนโซลเกมหน้าจอโอเล็ด 7 นิ้ว", price_satang: 1049000, orig_satang: 1299000, currency: "THB", stock_count: 15, slug: "nintendo-switch-oled-sp119" },
-          { item_id: "sp_120", item_name: "Xbox Series X คอนโซล 1TB 4K 120FPS พลังประมวลผลสูง", price_satang: 1820000, orig_satang: 1990000, currency: "THB", stock_count: 4, slug: "xbox-series-x-sp120" },
+          { item_id: "sp_118", item_name: "PlayStation 5 Slim (PS5) เครื่องเล่นเกมคอนโซล รุ่นใส่แผ่น", price_satang: 1749000, orig_satang: 1899000, currency: "THB", stock_count: 7, url: "https://shopee.co.th/search?keyword=PlayStation+5+Slim" },
+          { item_id: "sp_119", item_name: "Nintendo Switch OLED Model คอนโซลเกมหน้าจอโอเล็ด 7 นิ้ว", price_satang: 1049000, orig_satang: 1299000, currency: "THB", stock_count: 15, url: "https://shopee.co.th/search?keyword=Nintendo+Switch+OLED" },
+          { item_id: "sp_120", item_name: "Xbox Series X คอนโซล 1TB 4K 120FPS พลังประมวลผลสูง", price_satang: 1820000, orig_satang: 1990000, currency: "THB", stock_count: 4, url: "https://shopee.co.th/search?keyword=Xbox+Series+X" },
 
           // 5. สมาร์ทวอทช์ & สุขภาพ
-          { item_id: "sp_121", item_name: "Apple Watch Series 9 GPS ตัวเรือนอะลูมิเนียม ขนาด 41 มม.", price_satang: 1390000, orig_satang: 1590000, currency: "THB", stock_count: 9, slug: "apple-watch-s9-41-sp121" },
-          { item_id: "sp_122", item_name: "Garmin Forerunner 265 นาฬิกาวิ่ง GPS จอ AMOLED ระบบสัมผัส", price_satang: 1549000, orig_satang: 1699000, currency: "THB", stock_count: 6, slug: "garmin-forerunner-265-sp122" },
+          { item_id: "sp_121", item_name: "Apple Watch Series 9 GPS ตัวเรือนอะลูมิเนียม ขนาด 41 มม.", price_satang: 1390000, orig_satang: 1590000, currency: "THB", stock_count: 9, url: "https://shopee.co.th/search?keyword=Apple+Watch+Series+9+41mm" },
+          { item_id: "sp_122", item_name: "Garmin Forerunner 265 นาฬิกาวิ่ง GPS จอ AMOLED ระบบสัมผัส", price_satang: 1549000, orig_satang: 1699000, currency: "THB", stock_count: 6, url: "https://shopee.co.th/search?keyword=Garmin+Forerunner+265" },
 
           // 6. กล้อง & ไลฟ์สไตล์
-          { item_id: "sp_123", item_name: "DJI Osmo Pocket 3 Creator Combo กล้องพกพากิมบอลกันสั่น 3 แกน", price_satang: 2190000, orig_satang: 2390000, currency: "THB", stock_count: 5, slug: "dji-osmo-pocket-3-combo-sp123" },
-          { item_id: "sp_124", item_name: "GoPro HERO12 Black กล้องแอคชั่นแคม กันน้ำ 10 เมตร วิดีโอ 5.3K", price_satang: 1390000, orig_satang: 1590000, currency: "THB", stock_count: 8, slug: "gopro-hero12-black-sp124" },
-          { item_id: "sp_125", item_name: "Dyson Supersonic ไดร์เป่าผมเทคโนโลยีมอเตอร์ดิจิทัล V9", price_satang: 1490000, orig_satang: 1790000, currency: "THB", stock_count: 6, slug: "dyson-supersonic-sp125" },
-          { item_id: "sp_126", item_name: "Xiaomi Smart Air Purifier 4 Pro เครื่องฟอกอากาศอัจฉริยะกรอง PM2.5", price_satang: 549000, orig_satang: 699000, currency: "THB", stock_count: 18, slug: "xiaomi-air-purifier-4-pro-sp126" },
+          { item_id: "sp_123", item_name: "DJI Osmo Pocket 3 Creator Combo กล้องพกพากิมบอลกันสั่น 3 แกน", price_satang: 2190000, orig_satang: 2390000, currency: "THB", stock_count: 5, url: "https://shopee.co.th/search?keyword=DJI+Osmo+Pocket+3" },
+          { item_id: "sp_124", item_name: "GoPro HERO12 Black กล้องแอคชั่นแคม กันน้ำ 10 เมตร วิดีโอ 5.3K", price_satang: 1390000, orig_satang: 1590000, currency: "THB", stock_count: 8, url: "https://shopee.co.th/search?keyword=GoPro+HERO12+Black" },
+          { item_id: "sp_125", item_name: "Dyson Supersonic ไดร์เป่าผมเทคโนโลยีมอเตอร์ดิจิทัล V9", price_satang: 1490000, orig_satang: 1790000, currency: "THB", stock_count: 6, url: "https://shopee.co.th/search?keyword=Dyson+Supersonic" },
+          { item_id: "sp_126", item_name: "Xiaomi Smart Air Purifier 4 Pro เครื่องฟอกอากาศอัจฉริยะกรอง PM2.5", price_satang: 549000, orig_satang: 699000, currency: "THB", stock_count: 18, url: "https://shopee.co.th/search?keyword=Xiaomi+Smart+Air+Purifier+4+Pro" },
         ];
       }
 
@@ -784,7 +769,7 @@
           originalPrice: Math.round((raw.orig_satang / 100) * 100) / 100,
           currency: raw.currency,
           platform: this.platformName,
-          url: `${this.baseUrl}/product/${raw.slug}`,
+          url: raw.url,
           inStock: raw.stock_count > 0,
         }));
       }
@@ -801,42 +786,42 @@
 
         this._catalog = [
           // 1. หูฟัง & ระบบเสียง
-          { nid: "laz_8801", title: "Sony WH-1000XM5 หูฟังไร้สายครอบหูตัดเสียงรบกวนพรีเมียม", sale_price: "11450.00", orig_price: "13500.00", currency_code: "THB", is_available: true, sku_path: "products/sony-wh-1000xm5-i8801.html" },
-          { nid: "laz_8802", title: "Apple AirPods Pro (รุ่นที่ 2) เคส MagSafe พอร์ต USB-C", sale_price: "219.00", orig_price: "249.00", currency_code: "USD", is_available: true, sku_path: "products/apple-airpods-pro-2-i8802.html" },
-          { nid: "laz_8806", title: "Bose QuietComfort 45 หูฟังบลูทูธไร้สายตัดเสียงรบกวน", sale_price: "10800.00", orig_price: "12500.00", currency_code: "THB", is_available: false, sku_path: "products/bose-qc-45-i8806.html" },
-          { nid: "laz_8807", title: "Marshall Major IV หูฟังครอบหูไร้สาย สไตล์คลาสสิก แบตอึด", sale_price: "4590.00", orig_price: "5490.00", currency_code: "THB", is_available: true, sku_path: "products/marshall-major-iv-i8807.html" },
-          { nid: "laz_8808", title: "Marshall Emberton II ลำโพงบลูทูธพกพา กันน้ำ IP67", sale_price: "6290.00", orig_price: "6990.00", currency_code: "THB", is_available: true, sku_path: "products/marshall-emberton-ii-i8808.html" },
-          { nid: "laz_8809", title: "Shure SM7B ไมโครโฟนสำหรับจัดรายการและบันทึกเสียงร้องมืออาชีพ", sale_price: "14800.00", orig_price: "16500.00", currency_code: "THB", is_available: true, sku_path: "products/shure-sm7b-i8809.html" },
+          { nid: "laz_8801", title: "Sony WH-1000XM5 หูฟังไร้สายครอบหูตัดเสียงรบกวนพรีเมียม", sale_price: "11450.00", orig_price: "13500.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Sony+WH-1000XM5" },
+          { nid: "laz_8802", title: "Apple AirPods Pro (รุ่นที่ 2) เคส MagSafe พอร์ต USB-C", sale_price: "219.00", orig_price: "249.00", currency_code: "USD", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Apple+AirPods+Pro+2+USB-C" },
+          { nid: "laz_8806", title: "Bose QuietComfort 45 หูฟังบลูทูธไร้สายตัดเสียงรบกวน", sale_price: "10800.00", orig_price: "12500.00", currency_code: "THB", is_available: false, url: "https://www.lazada.co.th/catalog/?q=Bose+QuietComfort+45" },
+          { nid: "laz_8807", title: "Marshall Major IV หูฟังครอบหูไร้สาย สไตล์คลาสสิก แบตอึด", sale_price: "4590.00", orig_price: "5490.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Marshall+Major+IV" },
+          { nid: "laz_8808", title: "Marshall Emberton II ลำโพงบลูทูธพกพา กันน้ำ IP67", sale_price: "6290.00", orig_price: "6990.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Marshall+Emberton+II" },
+          { nid: "laz_8809", title: "Shure SM7B ไมโครโฟนสำหรับจัดรายการและบันทึกเสียงร้องมืออาชีพ", sale_price: "14800.00", orig_price: "16500.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Shure+SM7B" },
 
           // 2. คอมพิวเตอร์ & อุปกรณ์ต่อพ่วง
-          { nid: "laz_8803", title: "Logitech MX Master 3S เมาส์ไร้สายเสียงคลิกเงียบ Quiet Clicks", sale_price: "3190.00", orig_price: "3790.00", currency_code: "THB", is_available: true, sku_path: "products/logitech-mx-master-3s-i8803.html" },
-          { nid: "laz_8804", title: "Keychron K2 V2 เมคานิคอลคีย์บอร์ดไร้สาย Hot-Swappable", sale_price: "2990.00", orig_price: "3390.00", currency_code: "THB", is_available: true, sku_path: "products/keychron-k2-v2-i8804.html" },
-          { nid: "laz_8810", title: "Apple MacBook Air 13 นิ้ว ชิป M2 รุ่นเริ่มต้น 256GB Space Gray", sale_price: "33500.00", orig_price: "36900.00", currency_code: "THB", is_available: true, sku_path: "products/macbook-air-m2-i8810.html" },
-          { nid: "laz_8811", title: "ASUS ROG Zephyrus G14 โน้ตบุ๊กเกมมิ่งระดับไฮเอนด์ หน้าจอ 120Hz", sale_price: "48900.00", orig_price: "55900.00", currency_code: "THB", is_available: true, sku_path: "products/asus-rog-zephyrus-g14-i8811.html" },
-          { nid: "laz_8812", title: "Dell UltraSharp U2723QE จอมอนิเตอร์ IPS 4K สำหรับงานกราฟิก", sale_price: "19900.00", orig_price: "22900.00", currency_code: "THB", is_available: true, sku_path: "products/dell-ultrasharp-u2723qe-i8812.html" },
-          { nid: "laz_8813", title: "Elgato Stream Deck MK.2 แผงปุ่มลัดควบคุมคอนเทนต์สตรีมเมอร์", sale_price: "4690.00", orig_price: "5590.00", currency_code: "THB", is_available: true, sku_path: "products/elgato-stream-deck-mk2-i8813.html" },
+          { nid: "laz_8803", title: "Logitech MX Master 3S เมาส์ไร้สายเสียงคลิกเงียบ Quiet Clicks", sale_price: "3190.00", orig_price: "3790.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Logitech+MX+Master+3S" },
+          { nid: "laz_8804", title: "Keychron K2 V2 เมคานิคอลคีย์บอร์ดไร้สาย Hot-Swappable", sale_price: "2990.00", orig_price: "3390.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Keychron+K2+V2" },
+          { nid: "laz_8810", title: "Apple MacBook Air 13 นิ้ว ชิป M2 รุ่นเริ่มต้น 256GB Space Gray", sale_price: "33500.00", orig_price: "36900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=MacBook+Air+M2+13+256GB" },
+          { nid: "laz_8811", title: "ASUS ROG Zephyrus G14 โน้ตบุ๊กเกมมิ่งระดับไฮเอนด์ หน้าจอ 120Hz", sale_price: "48900.00", orig_price: "55900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=ASUS+ROG+Zephyrus+G14" },
+          { nid: "laz_8812", title: "Dell UltraSharp U2723QE จอมอนิเตอร์ IPS 4K สำหรับงานกราฟิก", sale_price: "19900.00", orig_price: "22900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Dell+UltraSharp+U2723QE" },
+          { nid: "laz_8813", title: "Elgato Stream Deck MK.2 แผงปุ่มลัดควบคุมคอนเทนต์สตรีมเมอร์", sale_price: "4690.00", orig_price: "5590.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Elgato+Stream+Deck+MK2" },
 
           // 3. สมาร์ทโฟน & แท็บเล็ต
-          { nid: "laz_8805", title: "Samsung Galaxy Tab S9 128GB Wi-Fi แท็บเล็ตหน้าจอคมชัด", sale_price: "24500.00", orig_price: "27900.00", currency_code: "THB", is_available: true, sku_path: "products/samsung-galaxy-tab-s9-i8805.html" },
-          { nid: "laz_8814", title: "Apple iPad Air 5 (M1) 64GB Wi-Fi แท็บเล็ตประสิทธิภาพสูง", sale_price: "18490.00", orig_price: "21900.00", currency_code: "THB", is_available: true, sku_path: "products/ipad-air-5-m1-i8814.html" },
-          { nid: "laz_8815", title: "Apple iPhone 15 Pro Max 256GB สมาร์ทโฟนชิป A17 Pro", sale_price: "40900.00", orig_price: "44900.00", currency_code: "THB", is_available: true, sku_path: "products/iphone-15-pro-max-256-i8815.html" },
-          { nid: "laz_8816", title: "Samsung Galaxy S24 Ultra 256GB พร้อมฟีเจอร์ Galaxy AI อัจฉริยะ", sale_price: "42500.00", orig_price: "46900.00", currency_code: "THB", is_available: true, sku_path: "products/galaxy-s24-ultra-256-i8816.html" },
-          { nid: "laz_8817", title: "Xiaomi 14 Pro 512GB สมาร์ทโฟนเรือธงกล้องระดับมืออาชีพ", sale_price: "29500.00", orig_price: "32900.00", currency_code: "THB", is_available: true, sku_path: "products/xiaomi-14-pro-512-i8817.html" },
+          { nid: "laz_8805", title: "Samsung Galaxy Tab S9 128GB Wi-Fi แท็บเล็ตหน้าจอคมชัด", sale_price: "24500.00", orig_price: "27900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Samsung+Galaxy+Tab+S9+128GB" },
+          { nid: "laz_8814", title: "Apple iPad Air 5 (M1) 64GB Wi-Fi แท็บเล็ตประสิทธิภาพสูง", sale_price: "18490.00", orig_price: "21900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=iPad+Air+5+M1+64GB" },
+          { nid: "laz_8815", title: "Apple iPhone 15 Pro Max 256GB สมาร์ทโฟนชิป A17 Pro", sale_price: "40900.00", orig_price: "44900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=iPhone+15+Pro+Max+256GB" },
+          { nid: "laz_8816", title: "Samsung Galaxy S24 Ultra 256GB พร้อมฟีเจอร์ Galaxy AI อัจฉริยะ", sale_price: "42500.00", orig_price: "46900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Samsung+Galaxy+S24+Ultra+256GB" },
+          { nid: "laz_8817", title: "Xiaomi 14 Pro 512GB สมาร์ทโฟนเรือธงกล้องระดับมืออาชีพ", sale_price: "29500.00", orig_price: "32900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Xiaomi+14+Pro+512GB" },
 
           // 4. เกมมิ่งและคอนโซล
-          { nid: "laz_8818", title: "PlayStation 5 Slim (PS5) เครื่องเล่นเกมคอนโซล รุ่นใส่แผ่น ประกันศูนย์", sale_price: "16990.00", orig_price: "18990.00", currency_code: "THB", is_available: true, sku_path: "products/playstation-5-slim-disc-i8818.html" },
-          { nid: "laz_8819", title: "Nintendo Switch OLED Model เครื่องเล่นเกมพกพาจอสวยสดใส", sale_price: "10890.00", orig_price: "12990.00", currency_code: "THB", is_available: true, sku_path: "products/nintendo-switch-oled-i8819.html" },
-          { nid: "laz_8820", title: "Xbox Series X เครื่องคอนโซลเจนใหม่ รองรับ Game Pass", sale_price: "18900.00", orig_price: "19900.00", currency_code: "THB", is_available: true, sku_path: "products/xbox-series-x-i8820.html" },
+          { nid: "laz_8818", title: "PlayStation 5 Slim (PS5) เครื่องเล่นเกมคอนโซล รุ่นใส่แผ่น ประกันศูนย์", sale_price: "16990.00", orig_price: "18990.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=PlayStation+5+Slim" },
+          { nid: "laz_8819", title: "Nintendo Switch OLED Model เครื่องเล่นเกมพกพาจอสวยสดใส", sale_price: "10890.00", orig_price: "12990.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Nintendo+Switch+OLED" },
+          { nid: "laz_8820", title: "Xbox Series X เครื่องคอนโซลเจนใหม่ รองรับ Game Pass", sale_price: "18900.00", orig_price: "19900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Xbox+Series+X" },
 
           // 5. สมาร์ทวอทช์ & สุขภาพ
-          { nid: "laz_8821", title: "Apple Watch Series 9 GPS ตัวเรือนอะลูมิเนียม ขนาด 41 มม.", sale_price: "14200.00", orig_price: "15900.00", currency_code: "THB", is_available: true, sku_path: "products/apple-watch-s9-41-i8821.html" },
-          { nid: "laz_8822", title: "Garmin Forerunner 265 สมาร์ทวอทช์สายวิ่งและออกกำลังกายระดับโปร", sale_price: "15190.00", orig_price: "16990.00", currency_code: "THB", is_available: true, sku_path: "products/garmin-forerunner-265-i8822.html" },
+          { nid: "laz_8821", title: "Apple Watch Series 9 GPS ตัวเรือนอะลูมิเนียม ขนาด 41 มม.", sale_price: "14200.00", orig_price: "15900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Apple+Watch+Series+9+41mm" },
+          { nid: "laz_8822", title: "Garmin Forerunner 265 สมาร์ทวอทช์สายวิ่งและออกกำลังกายระดับโปร", sale_price: "15190.00", orig_price: "16990.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Garmin+Forerunner+265" },
 
           // 6. กล้อง & ไลฟ์สไตล์
-          { nid: "laz_8823", title: "DJI Osmo Pocket 3 Creator Combo เซนเซอร์ CMOS 1 นิ้ว จอหมุนได้", sale_price: "22500.00", orig_price: "23900.00", currency_code: "THB", is_available: true, sku_path: "products/dji-osmo-pocket-3-combo-i8823.html" },
-          { nid: "laz_8824", title: "GoPro HERO12 Black กล้องแอคชั่นบันทึกวิดีโอ HDR และกันสั่น HyperSmooth", sale_price: "14200.00", orig_price: "15900.00", currency_code: "THB", is_available: true, sku_path: "products/gopro-hero12-black-i8824.html" },
-          { nid: "laz_8825", title: "Dyson Supersonic ไดร์เป่าผมควบคุมความร้อนอัจฉริยะ ผมไม่เสีย", sale_price: "14500.00", orig_price: "17900.00", currency_code: "THB", is_available: true, sku_path: "products/dyson-supersonic-i8825.html" },
-          { nid: "laz_8826", title: "Xiaomi Smart Air Purifier 4 Pro เครื่องฟอกอากาศห้องขนาดใหญ่", sale_price: "5790.00", orig_price: "6990.00", currency_code: "THB", is_available: true, sku_path: "products/xiaomi-air-purifier-4-pro-i8826.html" },
+          { nid: "laz_8823", title: "DJI Osmo Pocket 3 Creator Combo เซนเซอร์ CMOS 1 นิ้ว จอหมุนได้", sale_price: "22500.00", orig_price: "23900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=DJI+Osmo+Pocket+3" },
+          { nid: "laz_8824", title: "GoPro HERO12 Black กล้องแอคชั่นบันทึกวิดีโอ HDR และกันสั่น HyperSmooth", sale_price: "14200.00", orig_price: "15900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=GoPro+HERO12+Black" },
+          { nid: "laz_8825", title: "Dyson Supersonic ไดร์เป่าผมควบคุมความร้อนอัจฉริยะ ผมไม่เสีย", sale_price: "14500.00", orig_price: "17900.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Dyson+Supersonic" },
+          { nid: "laz_8826", title: "Xiaomi Smart Air Purifier 4 Pro เครื่องฟอกอากาศห้องขนาดใหญ่", sale_price: "5790.00", orig_price: "6990.00", currency_code: "THB", is_available: true, url: "https://www.lazada.co.th/catalog/?q=Xiaomi+Smart+Air+Purifier+4+Pro" },
         ];
       }
 
@@ -844,7 +829,7 @@
       get baseUrl() { return this._baseUrl; }
 
       fetch(keyword) {
-        const terms = keyword.lower().split(/\s+/);
+        const terms = keyword.toLowerCase().split(/\s+/);
         return this._catalog.filter(item => {
           const title = item.title.toLowerCase();
           return terms.some(t => title.includes(t));
@@ -858,7 +843,7 @@
           originalPrice: parseFloat(raw.orig_price) || 0,
           currency: raw.currency_code,
           platform: this.platformName,
-          url: `${this.baseUrl}/${raw.sku_path}`,
+          url: raw.url,
           inStock: Boolean(raw.is_available),
         }));
       }
@@ -932,7 +917,7 @@
           originalPrice: raw.orig_usd,
           currency: "USD",
           platform: this.platformName,
-          url: `${this.baseUrl}/dp/${raw.asin}`,
+          url: `${this.baseUrl}/s?k=${encodeURIComponent(raw.title.split(' ').slice(0,5).join(' '))}`,
           inStock: raw.in_stock,
         }));
       }
@@ -1047,7 +1032,7 @@
       );
 
       setupEventListeners();
-      performSearch("Sony");
+      // renderProductTags จะ trigger performSearch ให้อัตโนมัติผ่าน auto-click ปุ่มแรก
 
       if (window.lucide) {
         lucide.createIcons();
@@ -1064,23 +1049,188 @@
         performSearch(searchInput.value);
       });
 
-      searchInput.addEventListener('input', () => {
-        clearBtn.classList.toggle('hidden', !searchInput.value);
-      });
-
       clearBtn.addEventListener('click', () => {
         searchInput.value = '';
         clearBtn.classList.add('hidden');
+        hideAutocomplete();
         searchInput.focus();
       });
 
-      document.querySelectorAll('.preset-tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-          const query = tag.getAttribute('data-query');
-          searchInput.value = query;
-          clearBtn.classList.remove('hidden');
-          performSearch(query);
+      // ─── Category + Product 2-Level Navigation ────────────────────────────────
+      const PRODUCT_CATALOG = {
+        audio: [
+          { label: 'Sony WH-1000XM5',       query: 'Sony WH-1000XM5' },
+          { label: 'AirPods Pro 2',          query: 'AirPods Pro' },
+          { label: 'Bose QC 45',             query: 'Bose QuietComfort 45' },
+          { label: 'Marshall Major IV',      query: 'Marshall Major IV' },
+          { label: 'Marshall Emberton II',   query: 'Marshall Emberton' },
+          { label: 'Shure SM7B',             query: 'Shure SM7B' },
+        ],
+        computer: [
+          { label: 'MacBook Air M2',         query: 'MacBook Air M2' },
+          { label: 'ASUS ROG Zephyrus G14',  query: 'ASUS ROG Zephyrus G14' },
+          { label: 'Dell U2723QE 4K',        query: 'Dell UltraSharp U2723QE' },
+          { label: 'Logitech MX Master 3S',  query: 'Logitech MX Master 3S' },
+          { label: 'Keychron K2 V2',         query: 'Keychron K2' },
+          { label: 'Elgato Stream Deck',     query: 'Elgato Stream Deck' },
+        ],
+        mobile: [
+          { label: 'iPhone 15 Pro Max',      query: 'iPhone 15 Pro Max' },
+          { label: 'Samsung S24 Ultra',      query: 'Samsung Galaxy S24 Ultra' },
+          { label: 'Xiaomi 14 Pro',          query: 'Xiaomi 14 Pro' },
+          { label: 'iPad Air 5 (M1)',        query: 'iPad Air' },
+          { label: 'Samsung Tab S9',         query: 'Samsung Galaxy Tab S9' },
+        ],
+        gaming: [
+          { label: 'PlayStation 5 Slim',     query: 'PlayStation 5 Slim' },
+          { label: 'Nintendo Switch OLED',   query: 'Nintendo Switch OLED' },
+          { label: 'Xbox Series X',          query: 'Xbox Series X' },
+        ],
+        watch: [
+          { label: 'Apple Watch Series 9',   query: 'Apple Watch Series 9' },
+          { label: 'Garmin Forerunner 265',  query: 'Garmin Forerunner 265' },
+        ],
+        camera: [
+          { label: 'DJI Osmo Pocket 3',      query: 'DJI Osmo Pocket 3' },
+          { label: 'GoPro HERO12 Black',     query: 'GoPro HERO12' },
+          { label: 'Dyson Supersonic',       query: 'Dyson Supersonic' },
+          { label: 'Xiaomi Air Purifier 4 Pro', query: 'Xiaomi Air Purifier' },
+        ],
+      };
+
+      let activeCat = 'audio';
+      let activeProduct = null;
+
+      function renderProductTags(cat) {
+        const row = document.getElementById('product-tag-row');
+        const products = PRODUCT_CATALOG[cat] || [];
+        row.innerHTML = products.map((p, i) => `
+          <button type="button"
+            class="product-tag shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-medium border transition whitespace-nowrap
+              ${i === 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-white text-slate-600 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200'}"
+            data-query="${p.query}">
+            ${p.label}
+          </button>
+        `).join('');
+
+        // bind click
+        row.querySelectorAll('.product-tag').forEach(btn => {
+          btn.addEventListener('click', () => {
+            // highlight
+            row.querySelectorAll('.product-tag').forEach(b => {
+              b.className = 'product-tag shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-medium border transition whitespace-nowrap bg-white text-slate-600 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200';
+            });
+            btn.className = 'product-tag shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-medium border transition whitespace-nowrap bg-emerald-50 text-emerald-700 border-emerald-200';
+
+            const q = btn.getAttribute('data-query');
+            searchInput.value = '';
+            clearBtn.classList.add('hidden');
+            if (typeof hideAutocomplete === 'function') hideAutocomplete();
+            performSearch(q);
+          });
         });
+
+        // auto-click first product — ใช้ setTimeout เพื่อให้ทุก function define เสร็จก่อน
+        const first = row.querySelector('.product-tag');
+        if (first) setTimeout(() => first.click(), 0);
+      }
+
+      // bind category buttons
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.cat-btn').forEach(b => {
+            b.className = 'cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap';
+          });
+          btn.className = 'cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition whitespace-nowrap active-cat';
+
+          activeCat = btn.getAttribute('data-cat');
+          renderProductTags(activeCat);
+        });
+      });
+
+      // render default category on load
+      renderProductTags('audio');
+
+      // ─── Autocomplete ─────────────────────────────────────────────────────────
+      const dropdown = document.getElementById('autocomplete-dropdown');
+      const autocompleteList = document.getElementById('autocomplete-list');
+
+      function buildSuggestions(query) {
+        if (!query || query.trim().length < 2) return [];
+        const q = query.toLowerCase();
+
+        // รวม catalog ชื่อสินค้าจากทั้ง 3 scrapers (de-duplicated by keyword group)
+        const allNames = new Map(); // key = normalized product key, value = display label
+        [shopeeScraper, lazadaScraper, amazonScraper].forEach(scraper => {
+          scraper._catalog.forEach(item => {
+            const title = item.item_name || item.title;
+            if (!title) return;
+            // ตัด keyword หลัก (คำ 3 คำแรก) เป็น key เพื่อ de-duplicate
+            const key = title.toLowerCase().split(/\s+/).slice(0, 3).join(' ');
+            if (!allNames.has(key)) allNames.set(key, title);
+          });
+        });
+
+        const results = [];
+        allNames.forEach((displayName, key) => {
+          if (key.includes(q) || displayName.toLowerCase().includes(q)) {
+            results.push(displayName);
+          }
+        });
+        return results.slice(0, 8); // สูงสุด 8 รายการ
+      }
+
+      function showAutocomplete(suggestions) {
+        if (!suggestions.length) { hideAutocomplete(); return; }
+        autocompleteList.innerHTML = suggestions.map((s, i) => `
+          <button type="button" class="autocomplete-item w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 flex items-center gap-2.5 border-b border-slate-50 last:border-0 transition" data-index="${i}">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+            <span>${s}</span>
+          </button>
+        `).join('');
+
+        dropdown.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+
+        autocompleteList.querySelectorAll('.autocomplete-item').forEach(item => {
+          item.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const text = item.querySelector('span').textContent;
+            searchInput.value = text;
+            clearBtn.classList.remove('hidden');
+            hideAutocomplete();
+            // ยกเลิก highlight product tags
+            document.querySelectorAll('.product-tag').forEach(t => {
+              t.className = 'product-tag shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-medium border transition whitespace-nowrap bg-white text-slate-600 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200';
+            });
+            performSearch(text);
+          });
+        });
+      }
+
+      function hideAutocomplete() {
+        dropdown.classList.add('hidden');
+        autocompleteList.innerHTML = '';
+      }
+
+      searchInput.addEventListener('input', () => {
+        clearBtn.classList.toggle('hidden', !searchInput.value);
+        const suggestions = buildSuggestions(searchInput.value);
+        showAutocomplete(suggestions);
+      });
+
+      searchInput.addEventListener('focus', () => {
+        if (searchInput.value.length >= 2) {
+          showAutocomplete(buildSuggestions(searchInput.value));
+        }
+      });
+
+      searchInput.addEventListener('blur', () => {
+        setTimeout(hideAutocomplete, 150);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hideAutocomplete();
       });
 
       document.querySelectorAll('.currency-btn').forEach(btn => {
@@ -1123,7 +1273,8 @@
         const sym = engine.targetCurrency === 'THB' ? '฿' : (engine.targetCurrency === 'USD' ? '$' : '€');
         sliderLabel.textContent = `${sym}60,000`;
         sortSelect.value = 'price-asc';
-        performSearch(searchInput.value || "Sony");
+        // reset → กลับไปที่ปุ่มสินค้าแรกของหมวดปัจจุบัน
+        renderProductTags(activeCat);
       });
 
       const modal = document.getElementById('architecture-modal');

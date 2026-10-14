@@ -23,39 +23,40 @@ class MockLazadaScraper(BaseScraper):
         self._base_url: str = "https://www.lazada.co.th"
 
         # แคตตาล็อกสินค้า 26 รายการ สอดคล้องกับ Shopee และมีราคาแข่งขันกัน
+        # url = Lazada search URL จริง (รับประกันใช้งานได้เสมอ)
         self._catalog: list[dict[str, Any]] = [
             # 1. หูฟัง & ระบบเสียง (Audio)
             {
                 "nid": "laz_8801",
                 "title": "Sony WH-1000XM5 หูฟังไร้สายครอบหูตัดเสียงรบกวนพรีเมียม",
-                "sale_price": "11450.00",  # ถูกกว่า Shopee!
+                "sale_price": "11450.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/sony-wh-1000xm5-i8801.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Sony+WH-1000XM5",
             },
             {
                 "nid": "laz_8802",
                 "title": "Apple AirPods Pro (รุ่นที่ 2) เคส MagSafe พอร์ต USB-C",
-                "sale_price": "219.00",  # แสดงเป็น USD (~7,993.50 THB)
+                "sale_price": "219.00",
                 "currency_code": "USD",
                 "is_available": True,
-                "sku_path": "products/apple-airpods-pro-2-i8802.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Apple+AirPods+Pro+2+USB-C",
             },
             {
                 "nid": "laz_8806",
                 "title": "Bose QuietComfort 45 หูฟังบลูทูธไร้สายตัดเสียงรบกวน",
                 "sale_price": "10800.00",
                 "currency_code": "THB",
-                "is_available": False,  # สินค้าหมดสต็อกบน Lazada
-                "sku_path": "products/bose-qc-45-i8806.html",
+                "is_available": False,
+                "url": "https://www.lazada.co.th/catalog/?q=Bose+QuietComfort+45",
             },
             {
                 "nid": "laz_8807",
                 "title": "Marshall Major IV หูฟังครอบหูไร้สาย สไตล์คลาสสิก แบตอึด",
-                "sale_price": "4590.00",  # ถูกกว่า Shopee!
+                "sale_price": "4590.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/marshall-major-iv-i8807.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Marshall+Major+IV",
             },
             {
                 "nid": "laz_8808",
@@ -63,7 +64,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "6290.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/marshall-emberton-ii-i8808.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Marshall+Emberton+II",
             },
             {
                 "nid": "laz_8809",
@@ -71,17 +72,17 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "14800.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/shure-sm7b-i8809.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Shure+SM7B",
             },
 
             # 2. คอมพิวเตอร์ คีย์บอร์ด & อุปกรณ์ต่อพ่วง (PC & Gadgets)
             {
                 "nid": "laz_8803",
                 "title": "Logitech MX Master 3S เมาส์ไร้สายเสียงคลิกเงียบ Quiet Clicks",
-                "sale_price": "3190.00",  # มีสินค้าบน Lazada (Shopee หมด)
+                "sale_price": "3190.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/logitech-mx-master-3s-i8803.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Logitech+MX+Master+3S",
             },
             {
                 "nid": "laz_8804",
@@ -89,7 +90,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "2990.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/keychron-k2-v2-i8804.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Keychron+K2+V2",
             },
             {
                 "nid": "laz_8810",
@@ -97,15 +98,15 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "33500.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/macbook-air-m2-i8810.html",
+                "url": "https://www.lazada.co.th/catalog/?q=MacBook+Air+M2+13+256GB",
             },
             {
                 "nid": "laz_8811",
                 "title": "ASUS ROG Zephyrus G14 โน้ตบุ๊กเกมมิ่งระดับไฮเอนด์ หน้าจอ 120Hz",
-                "sale_price": "48900.00",  # ถูกกว่า Shopee และมีของพร้อมส่ง!
+                "sale_price": "48900.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/asus-rog-zephyrus-g14-i8811.html",
+                "url": "https://www.lazada.co.th/catalog/?q=ASUS+ROG+Zephyrus+G14",
             },
             {
                 "nid": "laz_8812",
@@ -113,41 +114,41 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "19900.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/dell-ultrasharp-u2723qe-i8812.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Dell+UltraSharp+U2723QE",
             },
             {
                 "nid": "laz_8813",
                 "title": "Elgato Stream Deck MK.2 แผงปุ่มลัดควบคุมคอนเทนต์สตรีมเมอร์",
-                "sale_price": "4690.00",  # ถูกกว่า Shopee!
+                "sale_price": "4690.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/elgato-stream-deck-mk2-i8813.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Elgato+Stream+Deck+MK2",
             },
 
             # 3. สมาร์ทโฟน & แท็บเล็ต (Smartphones & Tablets)
             {
                 "nid": "laz_8805",
                 "title": "Samsung Galaxy Tab S9 128GB Wi-Fi แท็บเล็ตหน้าจอคมชัด",
-                "sale_price": "24500.00",  # ถูกกว่า Shopee!
+                "sale_price": "24500.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/samsung-galaxy-tab-s9-i8805.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Samsung+Galaxy+Tab+S9+128GB",
             },
             {
                 "nid": "laz_8814",
                 "title": "Apple iPad Air 5 (M1) 64GB Wi-Fi แท็บเล็ตประสิทธิภาพสูง",
-                "sale_price": "18490.00",  # ถูกกว่า Shopee!
+                "sale_price": "18490.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/ipad-air-5-m1-i8814.html",
+                "url": "https://www.lazada.co.th/catalog/?q=iPad+Air+5+M1+64GB",
             },
             {
                 "nid": "laz_8815",
                 "title": "Apple iPhone 15 Pro Max 256GB สมาร์ทโฟนชิป A17 Pro",
-                "sale_price": "40900.00",  # ถูกกว่า Shopee!
+                "sale_price": "40900.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/iphone-15-pro-max-256-i8815.html",
+                "url": "https://www.lazada.co.th/catalog/?q=iPhone+15+Pro+Max+256GB",
             },
             {
                 "nid": "laz_8816",
@@ -155,7 +156,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "42500.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/galaxy-s24-ultra-256-i8816.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Samsung+Galaxy+S24+Ultra+256GB",
             },
             {
                 "nid": "laz_8817",
@@ -163,17 +164,17 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "29500.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/xiaomi-14-pro-512-i8817.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Xiaomi+14+Pro+512GB",
             },
 
             # 4. เกมมิ่งและคอนโซล (Gaming & Consoles)
             {
                 "nid": "laz_8818",
                 "title": "PlayStation 5 Slim (PS5) เครื่องเล่นเกมคอนโซล รุ่นใส่แผ่น ประกันศูนย์",
-                "sale_price": "16990.00",  # ถูกกว่า Shopee!
+                "sale_price": "16990.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/playstation-5-slim-disc-i8818.html",
+                "url": "https://www.lazada.co.th/catalog/?q=PlayStation+5+Slim",
             },
             {
                 "nid": "laz_8819",
@@ -181,7 +182,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "10890.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/nintendo-switch-oled-i8819.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Nintendo+Switch+OLED",
             },
             {
                 "nid": "laz_8820",
@@ -189,7 +190,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "18900.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/xbox-series-x-i8820.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Xbox+Series+X",
             },
 
             # 5. สมาร์ทวอทช์ & สุขภาพ (Smartwatches)
@@ -199,15 +200,15 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "14200.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/apple-watch-s9-41-i8821.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Apple+Watch+Series+9+41mm",
             },
             {
                 "nid": "laz_8822",
                 "title": "Garmin Forerunner 265 สมาร์ทวอทช์สายวิ่งและออกกำลังกายระดับโปร",
-                "sale_price": "15190.00",  # ถูกกว่า Shopee!
+                "sale_price": "15190.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/garmin-forerunner-265-i8822.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Garmin+Forerunner+265",
             },
 
             # 6. กล้อง & ไลฟ์สไตล์ (Cameras & Smart Living)
@@ -217,7 +218,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "22500.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/dji-osmo-pocket-3-combo-i8823.html",
+                "url": "https://www.lazada.co.th/catalog/?q=DJI+Osmo+Pocket+3",
             },
             {
                 "nid": "laz_8824",
@@ -225,15 +226,15 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "14200.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/gopro-hero12-black-i8824.html",
+                "url": "https://www.lazada.co.th/catalog/?q=GoPro+HERO12+Black",
             },
             {
                 "nid": "laz_8825",
                 "title": "Dyson Supersonic ไดร์เป่าผมควบคุมความร้อนอัจฉริยะ ผมไม่เสีย",
-                "sale_price": "14500.00",  # ถูกกว่า Shopee!
+                "sale_price": "14500.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/dyson-supersonic-i8825.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Dyson+Supersonic",
             },
             {
                 "nid": "laz_8826",
@@ -241,7 +242,7 @@ class MockLazadaScraper(BaseScraper):
                 "sale_price": "5790.00",
                 "currency_code": "THB",
                 "is_available": True,
-                "sku_path": "products/xiaomi-air-purifier-4-pro-i8826.html",
+                "url": "https://www.lazada.co.th/catalog/?q=Xiaomi+Smart+Air+Purifier+4+Pro",
             },
         ]
 
@@ -281,7 +282,7 @@ class MockLazadaScraper(BaseScraper):
             except (ValueError, TypeError):
                 price_val = 0.0
 
-            sku_path = raw_item.get("sku_path", "")
+            url = raw_item.get("url", self._base_url)
             currency = raw_item.get("currency_code", "THB")
             is_available = bool(raw_item.get("is_available", False))
 
@@ -290,7 +291,7 @@ class MockLazadaScraper(BaseScraper):
                 price=round(price_val, 2),
                 currency=currency,
                 platform=self.platform_name,
-                url=f"{self.base_url}/{sku_path}",
+                url=url,
                 in_stock=is_available,
                 scraped_at=datetime.now(timezone.utc),
             )
