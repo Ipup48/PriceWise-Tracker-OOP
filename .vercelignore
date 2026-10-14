@@ -1,0 +1,15 @@
+# Exclude Python backend, test suite, and virtual environments from Vercel deployment
+requirements.txt
+main.py
+engine/
+models/
+scrapers/
+tests/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.git/
+.gitignore
+README.md
