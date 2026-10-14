@@ -137,12 +137,12 @@
           <span class="text-slate-400 shrink-0 flex items-center mr-0.5">
             <i data-lucide="grid-3x3" class="w-3.5 h-3.5 text-indigo-400"></i>
           </span>
-          <button type="button" class="cat-btn active-cat shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition whitespace-nowrap" data-cat="audio">🎧 หูฟัง</button>
-          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="computer">💻 คอมฯ & Gadget</button>
-          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="mobile">📱 มือถือ & แท็บเล็ต</button>
-          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="gaming">🎮 เกมมิ่ง</button>
-          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="watch">⌚ สมาร์ทวอทช์</button>
-          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="camera">📷 กล้อง & ไลฟ์สไตล์</button>
+          <button type="button" class="cat-btn active-cat shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition whitespace-nowrap inline-flex items-center gap-1.5" data-cat="audio"><i data-lucide="headphones" class="w-3.5 h-3.5"></i><span>หูฟัง</span></button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap inline-flex items-center gap-1.5" data-cat="computer"><i data-lucide="laptop" class="w-3.5 h-3.5"></i><span>คอมฯ & Gadget</span></button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap inline-flex items-center gap-1.5" data-cat="mobile"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i><span>มือถือ & แท็บเล็ต</span></button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap inline-flex items-center gap-1.5" data-cat="gaming"><i data-lucide="gamepad-2" class="w-3.5 h-3.5"></i><span>เกมมิ่ง</span></button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap inline-flex items-center gap-1.5" data-cat="watch"><i data-lucide="watch" class="w-3.5 h-3.5"></i><span>สมาร์ทวอทช์</span></button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap inline-flex items-center gap-1.5" data-cat="camera"><i data-lucide="camera" class="w-3.5 h-3.5"></i><span>กล้อง & ไลฟ์สไตล์</span></button>
         </div>
         <!-- แถวสินค้าย่อย (เปลี่ยนตามหมวดที่เลือก) -->
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5" id="product-tag-row">
@@ -1165,9 +1165,9 @@
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.cat-btn').forEach(b => {
-            b.className = 'cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap';
+            b.className = 'cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap inline-flex items-center gap-1.5';
           });
-          btn.className = 'cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition whitespace-nowrap active-cat';
+          btn.className = 'cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition whitespace-nowrap active-cat inline-flex items-center gap-1.5';
 
           activeCat = btn.getAttribute('data-cat');
           renderProductTags(activeCat);
