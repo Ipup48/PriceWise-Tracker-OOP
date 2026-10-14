@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Tests
+tests/

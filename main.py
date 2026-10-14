@@ -8,9 +8,13 @@
     - Open/Closed Principle (การเพิ่ม Scraper ตัวใหม่ได้แบบไดนามิกขณะทำงาน)
 """
 
+from http.server import BaseHTTPRequestHandler
+import json
+import os
 import sys
 from typing import Any
 import unicodedata
+from urllib.parse import parse_qs, urlparse
 
 # กำหนดค่ามาตรฐานการแสดงผลภาษาไทยและ Unicode บน Terminal ทุกระบบปฏิบัติการ
 if hasattr(sys.stdout, "reconfigure"):
@@ -386,6 +390,117 @@ def main() -> None:
     print(">>> เปรียบเทียบ 'AirPods' ใหม่อีกครั้งโดยรวมข้อมูลจาก Amazon:")
     result_expanded = engine.compare("AirPods")
     print_comparison_table(result_expanded)
+
+
+# =====================================================================
+# Vercel Serverless Function & Web Handlers
+# (Exports: app, application, handler)
+# =====================================================================
+_HTML_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
+
+
+def _load_index_html() -> bytes:
+    if os.path.exists(_HTML_FILE):
+        with open(_HTML_FILE, "rb") as f:
+            return f.read()
+    return b"<!DOCTYPE html><html><body><h1>PriceWise Tracker</h1></body></html>"
+
+
+def _handle_api_compare(query_string: str) -> tuple[int, str, bytes]:
+    params = parse_qs(query_string)
+    keyword = params.get("keyword", params.get("q", [""]))[0]
+    currency = params.get("currency", ["THB"])[0].upper()
+
+    conv = FixedRateCurrencyConverter({"USD": 1.0, "THB": 36.50, "EUR": 0.92})
+    eng = PriceComparisonEngine(
+        scrapers=[MockShopeeScraper(), MockLazadaScraper(), MockAmazonScraper()],
+        currency_converter=conv,
+        target_currency=currency,
+    )
+    res = eng.compare(keyword)
+    data = {
+        "keyword": res.keyword,
+        "targetCurrency": res.target_currency,
+        "totalCount": res.total_count,
+        "minPrice": res.min_price,
+        "maxPrice": res.max_price,
+        "averagePrice": res.average_price,
+        "bestDeal": (
+            {
+                "name": res.best_deal.product.name,
+                "platform": res.best_deal.product.platform,
+                "price": res.best_deal.product.price,
+                "currency": res.best_deal.product.currency,
+                "normalizedPrice": res.best_deal.normalized_price,
+                "formattedNormalizedPrice": res.best_deal.formatted_normalized_price(),
+            }
+            if res.best_deal
+            else None
+        ),
+        "items": [
+            {
+                "name": item.product.name,
+                "price": item.product.price,
+                "currency": item.product.currency,
+                "platform": item.product.platform,
+                "url": item.product.url,
+                "inStock": item.product.in_stock,
+                "normalizedPrice": item.normalized_price,
+                "formattedNormalizedPrice": item.formatted_normalized_price(),
+            }
+            for item in res.items
+        ],
+        "errors": res.errors,
+    }
+    body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    return 200, "application/json; charset=utf-8", body
+
+
+def app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
+    """WSGI application callable for Vercel Serverless Function."""
+    path = environ.get("PATH_INFO", "/")
+    if path.startswith("/api/"):
+        status_code, ctype, body = _handle_api_compare(environ.get("QUERY_STRING", ""))
+    else:
+        status_code = 200
+        ctype = "text/html; charset=utf-8"
+        body = _load_index_html()
+
+    start_response(
+        f"{status_code} OK",
+        [
+            ("Content-Type", ctype),
+            ("Content-Length", str(len(body))),
+            ("Access-Control-Allow-Origin", "*"),
+        ],
+    )
+    return [body]
+
+
+application = app
+
+
+class handler(BaseHTTPRequestHandler):
+    """BaseHTTPRequestHandler for Vercel Serverless Function."""
+
+    def do_GET(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path.startswith("/api/"):
+            status_code, ctype, body = _handle_api_compare(parsed.query)
+        else:
+            status_code = 200
+            ctype = "text/html; charset=utf-8"
+            body = _load_index_html()
+
+        self.send_response(status_code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format: str, *args: Any) -> None:
+        pass
 
 
 if __name__ == "__main__":
