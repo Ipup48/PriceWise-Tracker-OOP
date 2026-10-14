@@ -154,7 +154,8 @@
           <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="mobile">📱 มือถือ & แท็บเล็ต</button>
           <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="gaming">🎮 เกมมิ่ง</button>
           <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="watch">⌚ สมาร์ทวอทช์</button>
-          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="camera">📷 กล้อง & ไลฟ์สไตล์</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="camera">📷 กล้อง</button>
+          <button type="button" class="cat-btn shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition whitespace-nowrap" data-cat="lifestyle">✨ ไลฟ์สไตล์</button>
         </div>
         <!-- แถวสินค้าย่อย (เปลี่ยนตามหมวดที่เลือก) -->
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5" id="product-tag-row">
@@ -1059,41 +1060,43 @@
       // ─── Category + Product 2-Level Navigation ────────────────────────────────
       const PRODUCT_CATALOG = {
         audio: [
-          { label: 'Sony WH-1000XM5',       query: 'Sony WH-1000XM5' },
-          { label: 'AirPods Pro 2',          query: 'AirPods Pro' },
-          { label: 'Bose QC 45',             query: 'Bose QuietComfort 45' },
-          { label: 'Marshall Major IV',      query: 'Marshall Major IV' },
-          { label: 'Marshall Emberton II',   query: 'Marshall Emberton' },
-          { label: 'Shure SM7B',             query: 'Shure SM7B' },
+          { label: 'Sony WH-1000XM5',          query: 'Sony WH-1000XM5' },
+          { label: 'Bose QC 45',               query: 'Bose QuietComfort 45' },
+          { label: 'Marshall Major IV',         query: 'Marshall Major IV' },
+          { label: 'Marshall Emberton II',      query: 'Marshall Emberton' },
+          { label: 'Shure SM7B',               query: 'Shure SM7B' },
         ],
         computer: [
-          { label: 'MacBook Air M2',         query: 'MacBook Air M2' },
-          { label: 'ASUS ROG Zephyrus G14',  query: 'ASUS ROG Zephyrus G14' },
-          { label: 'Dell U2723QE 4K',        query: 'Dell UltraSharp U2723QE' },
-          { label: 'Logitech MX Master 3S',  query: 'Logitech MX Master 3S' },
-          { label: 'Keychron K2 V2',         query: 'Keychron K2' },
-          { label: 'Elgato Stream Deck',     query: 'Elgato Stream Deck' },
+          { label: 'MacBook Air M2',            query: 'MacBook Air M2' },
+          { label: 'ASUS ROG Zephyrus G14',     query: 'ASUS ROG Zephyrus G14' },
+          { label: 'Dell U2723QE 4K',          query: 'Dell UltraSharp U2723QE' },
+          { label: 'Logitech MX Master 3S',     query: 'Logitech MX Master 3S' },
+          { label: 'Keychron K2 V2',           query: 'Keychron K2' },
+          { label: 'Elgato Stream Deck',        query: 'Elgato Stream Deck' },
         ],
         mobile: [
-          { label: 'iPhone 15 Pro Max',      query: 'iPhone 15 Pro Max' },
-          { label: 'Samsung S24 Ultra',      query: 'Samsung Galaxy S24 Ultra' },
-          { label: 'Xiaomi 14 Pro',          query: 'Xiaomi 14 Pro' },
-          { label: 'iPad Air 5 (M1)',        query: 'iPad Air' },
-          { label: 'Samsung Tab S9',         query: 'Samsung Galaxy Tab S9' },
+          { label: 'iPhone 15 Pro Max',         query: 'iPhone 15 Pro Max' },
+          { label: 'Samsung S24 Ultra',         query: 'Samsung Galaxy S24 Ultra' },
+          { label: 'Xiaomi 14 Pro',             query: 'Xiaomi 14 Pro' },
+          { label: 'iPad Air 5 (M1)',           query: 'iPad Air' },
+          { label: 'Samsung Tab S9',            query: 'Samsung Galaxy Tab S9' },
+          { label: 'AirPods Pro 2',             query: 'AirPods Pro' },
         ],
         gaming: [
-          { label: 'PlayStation 5 Slim',     query: 'PlayStation 5 Slim' },
-          { label: 'Nintendo Switch OLED',   query: 'Nintendo Switch OLED' },
-          { label: 'Xbox Series X',          query: 'Xbox Series X' },
+          { label: 'PlayStation 5 Slim',        query: 'PlayStation 5 Slim' },
+          { label: 'Nintendo Switch OLED',      query: 'Nintendo Switch OLED' },
+          { label: 'Xbox Series X',             query: 'Xbox Series X' },
         ],
         watch: [
-          { label: 'Apple Watch Series 9',   query: 'Apple Watch Series 9' },
-          { label: 'Garmin Forerunner 265',  query: 'Garmin Forerunner 265' },
+          { label: 'Apple Watch Series 9',      query: 'Apple Watch Series 9' },
+          { label: 'Garmin Forerunner 265',     query: 'Garmin Forerunner 265' },
         ],
         camera: [
-          { label: 'DJI Osmo Pocket 3',      query: 'DJI Osmo Pocket 3' },
-          { label: 'GoPro HERO12 Black',     query: 'GoPro HERO12' },
-          { label: 'Dyson Supersonic',       query: 'Dyson Supersonic' },
+          { label: 'DJI Osmo Pocket 3',         query: 'DJI Osmo Pocket 3' },
+          { label: 'GoPro HERO12 Black',        query: 'GoPro HERO12' },
+        ],
+        lifestyle: [
+          { label: 'Dyson Supersonic',          query: 'Dyson Supersonic' },
           { label: 'Xiaomi Air Purifier 4 Pro', query: 'Xiaomi Air Purifier' },
         ],
       };
