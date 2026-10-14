@@ -1,44 +1,51 @@
+"""บริการแปลงอัตราแลกเปลี่ยนเงินตรา (Currency Converter Service)
+
+ปฏิบัติตามหลักการออกแบบ:
+    - Interface Segregation & Dependency Inversion: ให้บริการผ่าน Abstract Base Class (ICurrencyConverter)
+    - Open/Closed Principle: สามารถเพิ่มหรือปรับเปลี่ยนอัตราแลกเปลี่ยนได้ขณะทำงานโดยไม่ต้องแก้ไขโค้ดเดิม
+"""
+
 from abc import ABC, abstractmethod
 
 
 class ICurrencyConverter(ABC):
-    """Abstract interface for currency exchange rate conversion."""
+    """อินเทอร์เฟซนามธรรมสำหรับการแปลงอัตราแลกเปลี่ยนสกุลเงิน."""
 
     @abstractmethod
     def convert(self, amount: float, from_currency: str, to_currency: str) -> float:
-        """Convert an amount from one currency to another.
+        """แปลงมูลค่าเงินจากสกุลเงินหนึ่งไปยังอีกสกุลเงินหนึ่ง
 
         Args:
-            amount: The numerical amount to convert.
-            from_currency: ISO 4217 code of source currency.
-            to_currency: ISO 4217 code of target currency.
+            amount: จำนวนเงินตัวเลขที่ต้องการแปลง
+            from_currency: รหัส ISO 4217 ของสกุลเงินต้นทาง
+            to_currency: รหัส ISO 4217 ของสกุลเงินเป้าหมาย
 
         Returns:
-            Converted amount in target currency rounded to 2 decimal places.
+            จำนวนเงินในสกุลเงินเป้าหมายที่ปัดเศษทศนิยม 2 ตำแหน่ง
         """
         pass
 
     @abstractmethod
     def get_exchange_rate(self, from_currency: str, to_currency: str) -> float:
-        """Retrieve exchange rate between two currencies."""
+        """ส่งคืนอัตราแลกเปลี่ยนระหว่างสองสกุลเงิน."""
         pass
 
 
 class FixedRateCurrencyConverter(ICurrencyConverter):
-    """Concrete currency converter using configurable fixed exchange rates.
+    """คลาสแปลงอัตราแลกเปลี่ยนที่ใช้อัตราคงที่ที่สามารถกำหนดค่าได้
 
-    Rates are stored relative to USD as a standard pivot currency.
-    Follows Open/Closed Principle: new currencies or rates can be registered
-    at runtime without modifying converter logic.
+    เก็บอัตราแลกเปลี่ยนโดยอ้างอิงเทียบกับ USD เป็นสกุลเงินแกนกลาง (Pivot Currency)
+    ปฏิบัติตาม Open/Closed Principle: สามารถเพิ่มสกุลเงินหรืออัปเดตอัตราแลกเปลี่ยน
+    ได้ในขณะทำงานโดยไม่ต้องแก้ไขตรรกะภายในของคลาส
     """
 
     def __init__(self, rates_to_usd: dict[str, float] | None = None) -> None:
-        """Initialize converter with exchange rates against 1 USD.
+        """เริ่มต้นตัวแปลงสกุลเงินด้วยอัตราแลกเปลี่ยนเทียบกับ 1 USD
 
         Args:
-            rates_to_usd: Dictionary mapping uppercase currency codes to units per 1 USD.
+            rates_to_usd: พจนานุกรมจับคู่รหัสสกุลเงินตัวพิมพ์ใหญ่กับมูลค่าต่อ 1 USD
         """
-        # Default baseline exchange rates (1 USD = X Currency)
+        # อัตราแลกเปลี่ยนอ้างอิงเริ่มต้น (1 USD = X หน่วยของสกุลเงินนั้น)
         self._rates_to_usd: dict[str, float] = {
             "USD": 1.0,
             "THB": 36.50,
@@ -51,13 +58,13 @@ class FixedRateCurrencyConverter(ICurrencyConverter):
             self._rates_to_usd.update({k.upper(): v for k, v in rates_to_usd.items()})
 
     def set_rate(self, currency: str, rate_to_usd: float) -> None:
-        """Update or register an exchange rate for a currency against 1 USD."""
+        """อัปเดตหรือลงทะเบียนอัตราแลกเปลี่ยนของสกุลเงินเทียบกับ 1 USD"""
         if rate_to_usd <= 0:
-            raise ValueError(f"Exchange rate must be positive: {rate_to_usd}")
+            raise ValueError(f"อัตราแลกเปลี่ยนต้องเป็นจำนวนบวก: {rate_to_usd}")
         self._rates_to_usd[currency.upper()] = rate_to_usd
 
     def get_exchange_rate(self, from_currency: str, to_currency: str) -> float:
-        """Get exchange rate multiplier from source to target currency."""
+        """คำนวณหาตัวคูณอัตราแลกเปลี่ยนจากสกุลเงินต้นทางไปยังสกุลเงินเป้าหมาย"""
         from_code = from_currency.upper()
         to_code = to_currency.upper()
 
@@ -65,11 +72,11 @@ class FixedRateCurrencyConverter(ICurrencyConverter):
             return 1.0
 
         if from_code not in self._rates_to_usd:
-            raise ValueError(f"Unsupported source currency: {from_code}")
+            raise ValueError(f"ไม่รองรับสกุลเงินต้นทาง: {from_code}")
         if to_code not in self._rates_to_usd:
-            raise ValueError(f"Unsupported target currency: {to_code}")
+            raise ValueError(f"ไม่รองรับสกุลเงินเป้าหมาย: {to_code}")
 
-        # Conversion via USD pivot:
+        # การแปลงผ่านแกนกลาง USD:
         # 1 from_currency = (1 / rates[from]) USD
         # USD to target = USD * rates[to]
         # rate = rates[to] / rates[from]
@@ -77,7 +84,7 @@ class FixedRateCurrencyConverter(ICurrencyConverter):
         return rate
 
     def convert(self, amount: float, from_currency: str, to_currency: str) -> float:
-        """Convert amount between two currencies."""
+        """แปลงจำนวนเงินระหว่างสองสกุลเงิน"""
         if amount == 0:
             return 0.0
         rate = self.get_exchange_rate(from_currency, to_currency)

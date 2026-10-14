@@ -1,3 +1,15 @@
+"""การทดสอบหน่วยย่อย (Unit Tests) สำหรับสแครปเปอร์ร้านค้าและวงจรชีวิต Template Method
+
+ครอบคลุม:
+    - ลำดับวงจรชีวิตของ Template Method (fetch -> parse -> validate)
+    - ระบบการตรวจสอบความถูกต้องและการกรองข้อมูลที่ไม่สมบูรณ์ (BaseScraper.validate)
+    - การแปลงข้อมูลราคาและลิงก์ของ Shopee (สตางค์ -> บาท)
+    - การจัดการสินค้าที่หมดสต็อก
+    - การแปลงข้อมูลและราคาสตริงของ Lazada
+    - การจัดการสินค้านำเข้าระหว่างประเทศ (USD)
+    - พฤติกรรมเมื่อไม่พบสินค้า
+"""
+
 from typing import Any
 import pytest
 
@@ -8,7 +20,7 @@ from scrapers.shopee import MockShopeeScraper
 
 
 class DummyTrackingScraper(BaseScraper):
-    """Test double scraper to verify Template Method lifecycle execution order."""
+    """สแครปเปอร์จำลองสำหรับตรวจสอบลำดับขั้นตอนการทำงานของ Template Method"""
 
     def __init__(self) -> None:
         self.call_log: list[str] = []
@@ -44,8 +56,7 @@ class DummyTrackingScraper(BaseScraper):
                 )
                 parsed.append(prod)
             except ValueError:
-                # If domain invariants reject it early (e.g. empty name or negative price),
-                # domain constructor throws ValueError
+                # หากกฎ Invariant ของโดเมนตรวจพบข้อผิดพลาด (เช่น ชื่อว่างหรือราคาติดลบ)
                 pass
         return parsed
 
@@ -55,7 +66,7 @@ class DummyTrackingScraper(BaseScraper):
 
 
 def test_base_scraper_template_method_lifecycle() -> None:
-    """Verify that scrape() executes fetch -> parse -> validate in exact order."""
+    """ตรวจสอบว่า scrape() ทำงานเรียงลำดับ fetch -> parse -> validate เสมอ"""
     scraper = DummyTrackingScraper()
     results = scraper.scrape("TestQuery")
 
@@ -66,10 +77,9 @@ def test_base_scraper_template_method_lifecycle() -> None:
 
 
 def test_base_scraper_validation_filters_invalid_items() -> None:
-    """Test that BaseScraper.validate filters out corrupt, non-product or invalid objects."""
+    """ทดสอบว่า BaseScraper.validate กรองอ็อบเจกต์ที่ผิดปกติหรือราคาไม่ถูกต้องออก"""
     scraper = DummyTrackingScraper()
 
-    # Create dummy objects
     valid_prod = Product(
         name="Valid",
         price=50.0,
@@ -79,7 +89,6 @@ def test_base_scraper_validation_filters_invalid_items() -> None:
         in_stock=True,
     )
 
-    # Subclass with custom parser to test validate directly
     class TestableScraper(BaseScraper):
         @property
         def platform_name(self) -> str:
@@ -96,7 +105,7 @@ def test_base_scraper_validation_filters_invalid_items() -> None:
             return []
 
     test_scraper = TestableScraper()
-    # Pass mixed items: valid, non-Product objects
+    # ส่งสินค้าผสมระหว่างอ็อบเจกต์ที่ถูกต้อง และสิ่งที่ไม่ใช่อ็อบเจกต์ Product
     filtered = test_scraper.validate([valid_prod, "not-a-product"])  # type: ignore[list-item]
 
     assert len(filtered) == 1
@@ -104,7 +113,7 @@ def test_base_scraper_validation_filters_invalid_items() -> None:
 
 
 def test_shopee_scraper_fetch_and_parse() -> None:
-    """Test MockShopeeScraper parsing and pricing conversions."""
+    """ทดสอบการดึงและแปลงข้อมูลของ MockShopeeScraper รวมถึงการแปลงสตางค์เป็นบาท"""
     scraper = MockShopeeScraper()
     assert scraper.platform_name == "Shopee"
     assert "shopee.co.th" in scraper.base_url
@@ -114,14 +123,14 @@ def test_shopee_scraper_fetch_and_parse() -> None:
 
     sony_item = next((p for p in results if "Sony" in p.name), None)
     assert sony_item is not None
-    assert sony_item.price == 11990.00  # Converted from 1199000 satang
+    assert sony_item.price == 11990.00  # แปลงจาก 1,199,000 สตางค์
     assert sony_item.currency == "THB"
     assert sony_item.in_stock is True
     assert "shopee.co.th/product/" in sony_item.url
 
 
 def test_shopee_scraper_out_of_stock_item() -> None:
-    """Test MockShopeeScraper properly handles out-of-stock items."""
+    """ทดสอบว่า MockShopeeScraper จัดการสินค้าที่หมดสต็อกได้อย่างถูกต้อง"""
     scraper = MockShopeeScraper()
     results = scraper.scrape("Logitech")
 
@@ -133,7 +142,7 @@ def test_shopee_scraper_out_of_stock_item() -> None:
 
 
 def test_lazada_scraper_fetch_and_parse() -> None:
-    """Test MockLazadaScraper parsing string prices and URLs."""
+    """ทดสอบการแปลงข้อมูลราคาสตริงและ URL ของ MockLazadaScraper"""
     scraper = MockLazadaScraper()
     assert scraper.platform_name == "Lazada"
     assert "lazada.co.th" in scraper.base_url
@@ -150,7 +159,7 @@ def test_lazada_scraper_fetch_and_parse() -> None:
 
 
 def test_lazada_scraper_currency_variation() -> None:
-    """Test MockLazadaScraper returns items with USD currency."""
+    """ทดสอบว่า MockLazadaScraper ส่งคืนสินค้าที่มีสกุลเงินต่างประเทศ (USD) ได้ถูกต้อง"""
     scraper = MockLazadaScraper()
     results = scraper.scrape("AirPods")
 
@@ -163,7 +172,7 @@ def test_lazada_scraper_currency_variation() -> None:
 
 
 def test_scraper_no_match() -> None:
-    """Test scraper behavior when keyword returns zero matches."""
+    """ทดสอบพฤติกรรมเมื่อคำค้นหาไม่ตรงกับสินค้าใด ๆ ในระบบ"""
     shopee = MockShopeeScraper()
     lazada = MockLazadaScraper()
 

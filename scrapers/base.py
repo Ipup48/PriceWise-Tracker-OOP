@@ -1,3 +1,11 @@
+"""คลาสฐานนามธรรม (Abstract Base Class) สำหรับตัวดึงข้อมูลสินค้า
+
+ประยุกต์ใช้ดีไซน์แพตเทิร์น:
+    - Template Method Pattern: กำหนดโครงสร้างขั้นตอนการทำงานที่แน่นอนใน scrape()
+      และมอบหมายหน้าที่ดึงข้อมูล (fetch) และแปลงข้อมูล (parse) ให้คลาสลูกไปทำ
+    - Liskov Substitution Principle: คลาสลูกทุกคลาสสามารถทำงานแทน BaseScraper ได้อย่างสมบูรณ์
+"""
+
 from abc import ABC, abstractmethod
 import logging
 from typing import Any
@@ -8,93 +16,91 @@ logger = logging.getLogger(__name__)
 
 
 class BaseScraper(ABC):
-    """Abstract Base Class for product scrapers implementing the Template Method Pattern.
+    """คลาสฐานนามธรรมสำหรับสแครปเปอร์สินค้าตามรูปแบบ Template Method Pattern
 
-    The Template Method Pattern defines the skeleton of the scraping algorithm in the
-    `scrape()` method, deferring the platform-specific fetching and parsing steps to
-    concrete subclasses while providing a standardized validation and error-handling pipeline.
+    เมธอด `scrape()` กำหนดโครงสร้างการทำงานแบบตายตัวของอัลกอริทึม
+    โดยมอบหมายให้คลาสลูกเขียนรายละเอียดการดึงข้อมูลเฉพาะแพลตฟอร์มใน `fetch()`
+    และการแปลงข้อมูลใน `parse()` พร้อมมีระบบตรวจสอบความถูกต้อง (validate) ที่ได้มาตรฐาน
 
-    Subclasses must implement:
-        - `platform_name`: Property returning the name of the marketplace.
-        - `base_url`: Property returning the root URL for the platform.
-        - `fetch(keyword)`: Retrieves raw data payload for the keyword.
-        - `parse(raw_data)`: Maps platform-specific raw dictionaries into `Product` models.
+    คลาสลูกต้องอิมพลีเมนต์:
+        - `platform_name`: พร็อพเพอร์ตี้ส่งคืนชื่อร้านค้า/แพลตฟอร์ม
+        - `base_url`: พร็อพเพอร์ตี้ส่งคืน URL หลักของแพลตฟอร์ม
+        - `fetch(keyword)`: ดึงข้อมูลดิบ (Raw Data) สำหรับคำค้นหานั้น
+        - `parse(raw_data)`: แปลงข้อมูลดิบของแพลตฟอร์มให้เป็นอ็อบเจกต์โดเมน Product
 
-    Subclasses may optionally override:
-        - `validate(products)`: Custom validation hook for business logic.
+    คลาสลูกสามารถ Override เพิ่มเติมได้:
+        - `validate(products)`: ฮุกตรวจสอบความถูกต้องเพิ่มเติมตามกฎธุรกิจเฉพาะ
     """
 
     @property
     @abstractmethod
     def platform_name(self) -> str:
-        """Return the friendly name of the e-commerce platform."""
+        """ส่งคืนชื่อที่แสดงของแพลตฟอร์มอีคอมเมิร์ซ"""
         pass
 
     @property
     @abstractmethod
     def base_url(self) -> str:
-        """Return the base URL of the e-commerce platform."""
+        """ส่งคืน URL เริ่มต้นของแพลตฟอร์ม"""
         pass
 
     @abstractmethod
     def fetch(self, keyword: str) -> list[dict[str, Any]]:
-        """Fetch raw data payload from the marketplace.
+        """ดึงข้อมูลดิบจากแพลตฟอร์มร้านค้า
 
         Args:
-            keyword: The search query string.
+            keyword: คำค้นหาสินค้า
 
         Returns:
-            A list of raw dictionary records retrieved from the platform.
+            รายการข้อมูลดิบ (Dictionary) ที่ได้รับจากแพลตฟอร์ม
         """
         pass
 
     @abstractmethod
     def parse(self, raw_data: list[dict[str, Any]]) -> list[Product]:
-        """Parse raw marketplace response into domain Product objects.
+        """แปลงข้อมูลดิบที่ได้จากร้านค้าให้อยู่ในรูปอ็อบเจกต์โดเมน Product
 
         Args:
-            raw_data: Raw dictionaries returned by `fetch()`.
+            raw_data: รายการข้อมูลดิบที่ได้จาก `fetch()`
 
         Returns:
-            A list of `Product` instances mapped from the raw data.
+            รายการอ็อบเจกต์ `Product` ที่แปลงเรียบร้อยแล้ว
         """
         pass
 
     def validate(self, products: list[Product]) -> list[Product]:
-        """Validate and filter parsed products.
+        """ตรวจสอบความถูกต้องและกรองสินค้าที่ไม่ได้คุณภาพออก
 
-        Default validation ensures:
-            1. Object is a valid `Product` instance.
-            2. Price is strictly positive (> 0).
-            3. Product name is not empty.
-            4. Valid product URL is present.
-
-        Can be overridden or augmented by subclasses.
+        การตรวจสอบมาตรฐานครอบคลุม:
+            1. ต้องเป็นอินสแตนซ์ของคลาส `Product`
+            2. ราคาสินค้าต้องมากกว่าศูนย์ (> 0)
+            3. ชื่อสินค้าต้องไม่เป็นค่าว่าง
+            4. ต้องมี URL ของสินค้าที่ถูกต้อง
 
         Args:
-            products: Parsed `Product` instances to validate.
+            products: รายการสินค้า `Product` ที่ต้องการตรวจสอบ
 
         Returns:
-            A list of valid `Product` objects meeting all quality criteria.
+            รายการสินค้า `Product` ที่ผ่านเกณฑ์คุณภาพทั้งหมด
         """
         validated_products: list[Product] = []
         for product in products:
             if not isinstance(product, Product):
-                logger.warning(f"[{self.platform_name}] Skipped non-Product object: {product}")
+                logger.warning(f"[{self.platform_name}] ข้ามอ็อบเจกต์ที่ไม่ใช่ Product: {product}")
                 continue
 
             if product.price <= 0:
                 logger.warning(
-                    f"[{self.platform_name}] Skipped item with non-positive price: {product.name} ({product.price})"
+                    f"[{self.platform_name}] ข้ามสินค้าที่ราคาไม่ถูกต้อง (<= 0): {product.name} ({product.price})"
                 )
                 continue
 
             if not product.name.strip():
-                logger.warning(f"[{self.platform_name}] Skipped item with empty name.")
+                logger.warning(f"[{self.platform_name}] ข้ามสินค้าที่ไม่มีชื่อ")
                 continue
 
             if not product.url.strip():
-                logger.warning(f"[{self.platform_name}] Skipped item without URL: {product.name}")
+                logger.warning(f"[{self.platform_name}] ข้ามสินค้าที่ไม่มี URL: {product.name}")
                 continue
 
             validated_products.append(product)
@@ -102,33 +108,33 @@ class BaseScraper(ABC):
         return validated_products
 
     def scrape(self, keyword: str) -> list[Product]:
-        """Template Method defining the standardized scraping lifecycle.
+        """Template Method ที่กำหนดวงจรชีวิตการทำงานมาตรฐานในการดึงข้อมูลสินค้า
 
-        Lifecycle Steps:
-            1. Fetch raw data: `fetch(keyword)`
-            2. Parse raw data into domain entities: `parse(raw_data)`
-            3. Validate domain entities: `validate(products)`
+        ขั้นตอนในวงจรชีวิต (Lifecycle Steps):
+            1. ดึงข้อมูลดิบ: `fetch(keyword)`
+            2. แปลงข้อมูลดิบเป็นโดเมนโมเดล: `parse(raw_data)`
+            3. ตรวจสอบความถูกต้องของโดเมนโมเดล: `validate(products)`
 
         Args:
-            keyword: Search query string.
+            keyword: คำค้นหาสินค้า
 
         Returns:
-            A list of validated `Product` domain models.
+            รายการอ็อบเจกต์โดเมน `Product` ที่ผ่านการตรวจสอบแล้ว
         """
-        logger.info(f"[{self.platform_name}] Starting scraping lifecycle for '{keyword}'...")
+        logger.info(f"[{self.platform_name}] เริ่มต้นวงจรชีวิตการดึงข้อมูลสำหรับคำค้นหา '{keyword}'...")
 
-        # Step 1: Fetch
+        # ขั้นตอนที่ 1: ดึงข้อมูลดิบ (Fetch)
         raw_data = self.fetch(keyword)
-        logger.debug(f"[{self.platform_name}] Fetched {len(raw_data)} raw records.")
+        logger.debug(f"[{self.platform_name}] ดึงข้อมูลดิบสำเร็จ {len(raw_data)} รายการ")
 
-        # Step 2: Parse
+        # ขั้นตอนที่ 2: แปลงข้อมูล (Parse)
         parsed_products = self.parse(raw_data)
-        logger.debug(f"[{self.platform_name}] Parsed {len(parsed_products)} products.")
+        logger.debug(f"[{self.platform_name}] แปลงข้อมูลเป็น Product สำเร็จ {len(parsed_products)} รายการ")
 
-        # Step 3: Validate
+        # ขั้นตอนที่ 3: ตรวจสอบความถูกต้อง (Validate)
         validated_products = self.validate(parsed_products)
         logger.info(
-            f"[{self.platform_name}] Successfully scraped and validated {len(validated_products)} products."
+            f"[{self.platform_name}] ดึงและตรวจสอบข้อมูลเสร็จสมบูรณ์ {len(validated_products)} รายการ"
         )
 
         return validated_products

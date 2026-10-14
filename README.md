@@ -1,27 +1,27 @@
-# Price Comparison Tracker
+# PriceWise Tracker - ระบบเปรียบเทียบราคาสินค้าเชิงวัตถุ (OOP & OOAD)
 
-An enterprise-grade, clean Object-Oriented Analysis & Design (OOAD) implementation of a **Price Comparison Tracker** in Python. This project demonstrates foundational software engineering design patterns, strict **SOLID** principles, and a clean hexagonal/layered architecture layout.
-
----
-
-## 📑 Table of Contents
-- [Architecture & Design](#architecture--design)
-  - [Class Diagram](#class-diagram)
-  - [Template Method Lifecycle](#template-method-lifecycle)
-- [SOLID Principles Adherence](#solid-principles-adherence)
-- [Design Patterns](#design-patterns)
-- [Directory Structure](#directory-structure)
-- [Installation & Quickstart](#installation--quickstart)
-- [Running Unit Tests](#running-unit-tests)
-- [Extending the System (Adding New Scrapers)](#extending-the-system-adding-new-scrapers)
+ระบบเปรียบเทียบราคาสินค้าออนไลน์ที่พัฒนาขึ้นตามหลักการ **การวิเคราะห์และการออกแบบเชิงวัตถุ (Object-Oriented Analysis & Design: OOAD)** ในระดับมาตรฐานวิศวกรรมซอฟต์แวร์ โครงงานนี้สาธิตการประยุกต์ใช้ดีไซน์แพตเทิร์นพื้นฐาน (Design Patterns), การปฏิบัติตามหลักการ **SOLID** อย่างเคร่งครัด และการจัดวางโครงสร้างสถาปัตยกรรมแบบแยกส่วน (Clean Decoupled Architecture)
 
 ---
 
-## 🏛 Architecture & Design
+## 📑 สารบัญ (Table of Contents)
+- [สถาปัตยกรรมและการออกแบบ (Architecture & Design)](#-สถาปัตยกรรมและการออกแบบ-architecture--design)
+  - [แผนภาพคลาส (Class Diagram)](#แผนภาพคลาส-class-diagram)
+  - [วงจรชีวิตของ Template Method (Template Method Lifecycle)](#วงจรชีวิตของ-template-method-template-method-lifecycle)
+- [การปฏิบัติตามหลักการ SOLID (SOLID Principles Adherence)](#-การปฏิบัติตามหลักการ-solid-solid-principles-adherence)
+- [รูปแบบการออกแบบที่นำมาใช้ (Design Patterns)](#-รูปแบบการออกแบบที่นำมาใช้-design-patterns)
+- [โครงสร้างไดเรกทอรีของโครงงาน (Directory Structure)](#-โครงสร้างไดเรกทอรีของโครงงาน-directory-structure)
+- [การติดตั้งและวิธีเริ่มต้นใช้งาน (Installation & Quickstart)](#-การติดตั้งและวิธีเริ่มต้นใช้งาน-installation--quickstart)
+- [การทดสอบด้วย Unit Tests (Running Unit Tests)](#-การทดสอบด้วย-unit-tests-running-unit-tests)
+- [การขยายระบบเพิ่มเติม (Extending the System)](#-การขยายระบบเพิ่มเติม-extending-the-system)
 
-The system models an e-commerce aggregation platform where multiple marketplace scrapers fetch and parse disparate catalog structures, validate domain invariants, normalize international currencies, and sort products to find the best consumer deals.
+---
 
-### Class Diagram
+## 🏛 สถาปัตยกรรมและการออกแบบ (Architecture & Design)
+
+ระบบจำลองแพลตฟอร์มการรวบรวมข้อมูลอีคอมเมิร์ซ (E-commerce Aggregation Platform) โดยมีตัวดึงข้อมูลจากแต่ละร้านค้า (Scrapers) ทำหน้าที่ดึงและแปลงข้อมูลที่มีโครงสร้างแตกต่างกัน, ตรวจสอบความถูกต้องของกฎสถาปัตยกรรม (Domain Invariants), ปรับมาตรฐานสกุลเงินข้ามพรมแดนให้เป็นสกุลเงินเดียวกัน และจัดเรียงลำดับราคาเพื่อค้นหาข้อเสนอที่ดีที่สุดสำหรับผู้บริโภค
+
+### แผนภาพคลาส (Class Diagram)
 
 ```mermaid
 classDiagram
@@ -106,167 +106,168 @@ classDiagram
         +compare(keyword: str, in_stock_only: bool) ComparisonResult
     }
 
-    BaseScraper <|-- MockShopeeScraper : realizes
-    BaseScraper <|-- MockLazadaScraper : realizes
-    ICurrencyConverter <|-- FixedRateCurrencyConverter : realizes
+    BaseScraper <|-- MockShopeeScraper : สืบทอด (Inheritance)
+    BaseScraper <|-- MockLazadaScraper : สืบทอด (Inheritance)
+    ICurrencyConverter <|-- FixedRateCurrencyConverter : อิมพลีเมนต์ (Realization)
 
-    PriceComparisonEngine o-- BaseScraper : aggregates / composition
-    PriceComparisonEngine --> ICurrencyConverter : depends on abstraction
-    PriceComparisonEngine ..> ComparisonResult : produces
-    ComparisonResult *-- ComparisonItem : contains
-    ComparisonItem *-- Product : wraps
-    BaseScraper ..> Product : creates
+    PriceComparisonEngine o-- BaseScraper : การประกอบรวม (Composition)
+    PriceComparisonEngine --> ICurrencyConverter : พึ่งพานามธรรม (Dependency Inversion)
+    PriceComparisonEngine ..> ComparisonResult : สร้างผลลัพธ์
+    ComparisonResult *-- ComparisonItem : ประกอบด้วย
+    ComparisonItem *-- Product : ห่อหุ้ม
+    BaseScraper ..> Product : สร้างอ็อบเจกต์
 ```
 
 ---
 
-### Template Method Lifecycle
+### วงจรชีวิตของ Template Method (Template Method Lifecycle)
 
-The scraper pipeline enforces the **Template Method Pattern** via `BaseScraper.scrape(keyword)`. The algorithm's invariant workflow is locked in the base class, while platform-specific fetch and parse details are deferred to subclasses.
+ระบบ Scraper ถูกควบคุมด้วยรูปแบบ **Template Method Pattern** ผ่านเมธอด `BaseScraper.scrape(keyword)` ซึ่งกำหนดโครงสร้างลำดับขั้นตอนการทำงานที่ตายตัวในคลาสฐาน (Invariant Workflow) ในขณะที่รายละเอียดการเชื่อมต่อ API และการแปลงโครงสร้างข้อมูลเฉพาะของแต่ละแพลตฟอร์มถูกส่งต่อไปให้คลาสลูกเป็นผู้อิมพลีเมนต์
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Caller as Client / Engine
+    actor Caller as ผู้เรียกใช้งาน / PriceComparisonEngine
     participant Scraper as Concrete Scraper (BaseScraper)
-    participant Platform as Marketplace Platform / API
-    participant Domain as Domain (Product)
+    participant Platform as แพลตฟอร์มร้านค้า / API
+    participant Domain as โดเมนโมเดล (Product)
 
     Caller->>Scraper: scrape(keyword)
     activate Scraper
-    Note over Scraper: Step 1: Fetch
+    Note over Scraper: ขั้นตอนที่ 1: ดึงข้อมูลดิบ (Fetch)
     Scraper->>Platform: fetch(keyword)
-    Platform-->>Scraper: list[dict] (raw data)
+    Platform-->>Scraper: list[dict] (ข้อมูลดิบ)
     
-    Note over Scraper: Step 2: Parse
-    Scraper->>Domain: parse(raw_data) -> instantiate Product objects
+    Note over Scraper: ขั้นตอนที่ 2: แปลงข้อมูล (Parse)
+    Scraper->>Domain: parse(raw_data) -> สร้างอ็อบเจกต์ Product
     Domain-->>Scraper: list[Product]
 
-    Note over Scraper: Step 3: Validate
-    Scraper->>Scraper: validate(products) (filters invalid prices, URLs, types)
+    Note over Scraper: ขั้นตอนที่ 3: ตรวจสอบความถูกต้อง (Validate)
+    Scraper->>Scraper: validate(products) (กรองราคาติดลบ, ลิงก์ว่าง, ข้อผิดพลาด)
     
-    Scraper-->>Caller: list[Product] (guaranteed valid)
+    Scraper-->>Caller: list[Product] (สินค้าที่ผ่านเกณฑ์คุณภาพ)
     deactivate Scraper
 ```
 
 ---
 
-## 🎯 SOLID Principles Adherence
+## 🎯 การปฏิบัติตามหลักการ SOLID (SOLID Principles Adherence)
 
-| Principle | Implementation Details |
+| หลักการ (Principle) | รายละเอียดการประยุกต์ใช้งานในระบบ |
 |---|---|
-| **Single Responsibility (SRP)** | - `Product`: Encapsulates only domain product state and domain invariant checks.<br>- `BaseScraper`: Governs the scraping workflow skeleton.<br>- `MockShopeeScraper` / `MockLazadaScraper`: Handle platform-specific raw data acquisition and schema translation.<br>- `ICurrencyConverter`: Handles exchange rates and conversions.<br>- `PriceComparisonEngine`: Orchestrates querying scrapers, normalizing, filtering, and sorting. |
-| **Open/Closed (OCP)** | The engine is open for extension but closed for modification. New scrapers (e.g., `MockAmazonScraper` or TikTok Shop) can be registered via `engine.register_scraper()` without modifying `PriceComparisonEngine` or any existing scrapers. |
-| **Liskov Substitution (LSP)** | Subclasses (`MockShopeeScraper`, `MockLazadaScraper`, `MockAmazonScraper`) strictly honor the `BaseScraper` contract. Any scraper can be swapped transparently into the engine without unexpected side-effects. |
-| **Interface Segregation (ISP)** | Scrapers only implement `fetch()` and `parse()` (with an optional hook into `validate()`). They are not forced to depend on unrelated aggregation or conversion interfaces. |
-| **Dependency Inversion (DIP)** | `PriceComparisonEngine` depends solely on abstractions: `BaseScraper` (ABC) and `ICurrencyConverter` (ABC). Concrete implementations are passed into the constructor (Dependency Injection). |
+| **Single Responsibility (SRP)<br>ความรับผิดชอบเดี่ยว** | - `Product`: รับผิดชอบเฉพาะการเก็บข้อมูลสินค้าและตรวจสอบความสมบูรณ์ของข้อมูล (Invariants)<br>- `BaseScraper`: ควบคุมโครงสร้างวงจรชีวิตการดึงข้อมูล<br>- `MockShopeeScraper` / `MockLazadaScraper`: รับผิดชอบเฉพาะการดึงข้อมูลดิบและแปลงโครงสร้างข้อมูลของแพลตฟอร์มตนเอง<br>- `ICurrencyConverter`: รับผิดชอบเฉพาะการคำนวณอัตราแลกเปลี่ยนและการแปลงสกุลเงิน<br>- `PriceComparisonEngine`: ประสานงานการส่งคำค้นหา, ปรับค่าเงิน, คัดกรอง และจัดอันดับราคา |
+| **Open/Closed (OCP)<br>เปิดต่อส่วนขยาย ปิดต่อการแก้ไข** | ระบบ Engine เปิดกว้างให้สามารถต่อเติมสแครปเปอร์แพลตฟอร์มใหม่ (เช่น `MockAmazonScraper` หรือ TikTok Shop) ได้ทันทีผ่าน `engine.register_scraper()` ในขณะทำงาน (Runtime) โดยไม่ต้องแก้ไขโค้ดเดิมใน `PriceComparisonEngine` หรือสแครปเปอร์ตัวอื่น |
+| **Liskov Substitution (LSP)<br>การแทนที่ของลิสคอฟ** | คลาสลูกของสแครปเปอร์ทั้งหมด (`MockShopeeScraper`, `MockLazadaScraper`, `MockAmazonScraper`) ปฏิบัติตามสัญญาการใช้งานของ `BaseScraper` อย่างเคร่งครัด สามารถสลับสับเปลี่ยนหรือเพิ่มเข้าไปใน Engine ได้อย่างราบรื่นโดยไม่ก่อให้เกิดผลข้างเคียงที่ไม่คาดคิด |
+| **Interface Segregation (ISP)<br>การแยกอินเทอร์เฟซ** | สแครปเปอร์จะอิมพลีเมนต์เฉพาะเมธอดที่เกี่ยวข้องกับการดึงข้อมูลจริง (`fetch` และ `parse`) โดยไม่ต้องพึ่งพาอินเทอร์เฟซที่ไม่เกี่ยวข้องกับการทำงาน เช่น การรวมสถิติหรือการแปลงอัตราแลกเปลี่ยน |
+| **Dependency Inversion (DIP)<br>การผกผันการพึ่งพา** | คลาสระดับสูงอย่าง `PriceComparisonEngine` พึ่งพาเฉพาะคลาสนามธรรม (`BaseScraper` และ `ICurrencyConverter`) แทนที่จะขึ้นตรงกับคลาสแพลตฟอร์มจริงหรือการฝังอัตราแลกเปลี่ยนแบบตายตัว โดยส่งผ่านอินสแตนซ์ผ่าน Constructor (Dependency Injection) |
 
 ---
 
-## 🧩 Design Patterns
+## 🧩 รูปแบบการออกแบบที่นำมาใช้ (Design Patterns)
 
-1. **Template Method Pattern (`BaseScraper.scrape`)**
-   Enforces a consistent 3-stage lifecycle (`fetch` $\rightarrow$ `parse` $\rightarrow$ `validate`) across all marketplaces. Platform scrapers cannot accidentally bypass validation or alter execution order.
-2. **Strategy / Service Provider Pattern (`ICurrencyConverter`)**
-   Enables seamless currency conversion strategies (fixed rates, mocked rates, live API rates) to be injected without coupling market comparisons to financial rates.
-3. **Composition & Dependency Injection (`PriceComparisonEngine`)**
-   Scrapers and converters are composed into the engine via constructor injection or dynamic registration (`register_scraper`).
-4. **Fault Isolation (Robust Aggregation)**
-   If a single marketplace API fails or times out, the engine isolates the error, logs it in `result.errors`, and returns successful results from all remaining platforms.
+1. **Template Method Pattern (`BaseScraper.scrape`)**  
+   ควบคุมวงจรชีวิต 3 ขั้นตอน (`fetch` $\rightarrow$ `parse` $\rightarrow$ `validate`) ให้เป็นมาตรฐานเดียวกันในทุกร้านค้า คลาสลูกไม่สามารถข้ามขั้นตอนการตรวจสอบหรือเปลี่ยนลำดับการทำงานได้
+2. **Strategy / Service Provider Pattern (`ICurrencyConverter`)**  
+   เปิดโอกาสให้สามารถเปลี่ยนกลยุทธ์การแปลงสกุลเงิน (อัตราแลกเปลี่ยนคงที่, อัตราแลกเปลี่ยนจำลอง, หรือ API อัตราแลกเปลี่ยนแบบเรียลไทม์) ได้อย่างอิสระโดยไม่ผูกมัดกับตัวเปรียบเทียบราคา
+3. **Composition & Dependency Injection (`PriceComparisonEngine`)**  
+   ประกอบชิ้นส่วน Scrapers และ Converters เข้ากับ Engine ผ่านคอนสตรัคเตอร์ หรือลงทะเบียนแบบไดนามิกผ่าน `register_scraper`
+4. **Fault Isolation (การแยกส่วนข้อผิดพลาด)**  
+   หากมี API ของร้านค้าใดเกิดข้อผิดพลาดหรือหมดเวลาเชื่อมต่อ ระบบจะแยกข้อผิดพลาดและบันทึกไว้ใน `result.errors` โดยยังคงส่งมอบผลลัพธ์ของร้านค้าอื่นที่ทำงานได้ตามปกติให้แก่ผู้ใช้งาน
 
 ---
 
-## 📂 Directory Structure
+## 📂 โครงสร้างไดเรกทอรีของโครงงาน (Directory Structure)
 
 ```text
 .
 ├── models/
 │   ├── __init__.py
-│   └── product.py            # Product domain dataclass with validation
+│   └── product.py            # โดเมนโมเดล Product (Dataclass) พร้อมระบบตรวจสอบ Invariants
 ├── scrapers/
 │   ├── __init__.py
-│   ├── base.py               # BaseScraper ABC (Template Method Pattern)
-│   ├── shopee.py             # MockShopeeScraper implementation
-│   └── lazada.py             # MockLazadaScraper implementation
+│   ├── base.py               # Abstract Base Class BaseScraper (Template Method Pattern)
+│   ├── shopee.py             # คลาสจำลองสแครปเปอร์ Shopee (แปลงราคาจากสตางค์)
+│   └── lazada.py             # คลาสจำลองสแครปเปอร์ Lazada (รองรับราคาสตริงและ USD)
 ├── engine/
 │   ├── __init__.py
 │   ├── comparison.py         # PriceComparisonEngine, ComparisonItem, ComparisonResult
 │   └── currency.py           # ICurrencyConverter, FixedRateCurrencyConverter
 ├── tests/
 │   ├── __init__.py
-│   ├── test_scrapers.py      # Unit tests for scraper lifecycle and parsers
-├── main.py                   # Demonstration script & CLI entry point
-├── index.html                # Standalone Web Dashboard (OOAD simulation in JS)
-├── requirements.txt          # Python dependencies
-├── .gitignore                # Git ignore patterns
-└── README.md                 # Project architecture documentation
+│   ├── test_engine.py        # การทดสอบ Engine, การจัดอันดับ, การกรองสต็อก และการแปลงค่าเงิน
+│   └── test_scrapers.py      # การทดสอบวงจรชีวิต Template Method และตัวแปลงข้อมูล
+├── main.py                   # สคริปต์สาธิตการทำงานและจุดเข้าใช้งานผ่าน CLI
+├── index.html                # แดชบอร์ดแสดงผลบนเว็บ (จำลอง OOP บน JavaScript)
+├── requirements.txt          # รายการไลบรารีที่จำเป็นของ Python
+├── .gitignore                # การละเว้นไฟล์ที่ไม่จำเป็นใน Git
+└── README.md                 # เอกสารอธิบายสถาปัตยกรรมระบบ (ภาษาไทย)
 ```
 
 ---
 
-## 🚀 Installation & Quickstart
+## 🚀 การติดตั้งและวิธีเริ่มต้นใช้งาน (Installation & Quickstart)
 
-### 1. Prerequisites
-- Python 3.10+ (compatible with Python 3.10, 3.11, 3.12, 3.13, 3.14+)
+### 1. ความต้องการของระบบ
+- Python 3.10 ขึ้นไป (รองรับ Python 3.10, 3.11, 3.12, 3.13, 3.14+)
 
-### 2. Setup Virtual Environment (Recommended)
+### 2. สร้างและเปิดใช้งาน Virtual Environment (แนะนำ)
 ```bash
-# Windows (PowerShell)
-python -m venv .venv
+# บน Windows (PowerShell)
+py -m venv .venv
 .venv\Scripts\Activate.ps1
 
-# macOS / Linux
+# บน macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### 3. ติดตั้งไลบรารีที่จำเป็น
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run the Demonstration
-Execute the main script to run four demonstration scenarios (Direct Comparison, Currency Normalization, Stock Filtering, and Dynamic Scraper Extension):
+### 4. รันการสาธิตระบบ
+รันสคริปต์หลักเพื่อแสดงสถานการณ์จำลอง 4 รูปแบบ (การเปรียบเทียบราคาโดยตรง, การปรับมาตรฐานสกุลเงินข้ามพรมแดน, การกรองสินค้าคงคลัง และการขยายระบบด้วย Open/Closed Principle):
 ```bash
-python main.py
+py main.py
 ```
 
-### 5. Run with CLI Search Query
-You can pass any product search query directly from your command line:
+### 5. รันการค้นหาผ่าน Command Line (CLI Query)
+สามารถระบุคำค้นหาที่ต้องการทดสอบต่อท้ายคำสั่งได้โดยตรง:
 ```bash
-python main.py "AirPods"
-python main.py "Sony"
-python main.py "Keyboard"
+py main.py "AirPods"
+py main.py "Sony"
+py main.py "Keyboard"
 ```
 
-### 6. Interactive Web Dashboard (`index.html`)
-Open [`index.html`](file:///C:/Users/wutti/OneDrive/Desktop/opp%20%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%B9%E0%B9%88/index.html) directly in any modern browser (or double-click the file in Windows File Explorer). It requires **zero build tools** and runs an embedded client-side JavaScript OOP engine mirroring the Python architecture.
+### 6. แดชบอร์ดแสดงผลแบบเว็บอินเทอร์แอคทีฟ (`index.html`)
+เปิดไฟล์ [`index.html`](file:///C:/Users/Aten/Desktop/%E0%B8%9B%E0%B8%B5%203/%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B2%E0%B8%88%E0%B8%B2%E0%B8%A3%E0%B8%A2%E0%B9%8C%20%E0%B8%AA%E0%B8%A1%E0%B9%80%E0%B8%81%E0%B8%B5%E0%B8%A2%E0%B8%A3%E0%B8%95%E0%B8%B4%20%E0%B8%8A%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%AB%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%99/PriceWise-Tracker-OOP/index.html) ผ่านเว็บเบราว์เซอร์ใดก็ได้ โดยระบบไม่ต้องใช้ Build Tools ใด ๆ และทำงานด้วย JavaScript OOP Engine ฝั่ง Client ที่จำลองสถาปัตยกรรมเดียวกับเวอร์ชัน Python
 
 ---
 
-## 🧪 Running Unit Tests
+## 🧪 การทดสอบด้วย Unit Tests (Running Unit Tests)
 
-Run the full pytest suite with verbose output:
+รันชุดการทดสอบทั้งหมดด้วย `pytest`:
 
 ```bash
-python -m pytest tests -v
+py -m pytest tests -v
 ```
 
-### Test Coverage Highlights
-- ✅ Template method lifecycle order (`fetch` $\rightarrow$ `parse` $\rightarrow$ `validate`)
-- ✅ Filtering corrupt or invalid items (negative prices, missing URLs)
-- ✅ Platform parsing fidelity (Shopee satang-to-THB conversions, Lazada string floats)
-- ✅ Lowest-to-highest sorting across platforms
-- ✅ Cross-border currency conversion (USD to THB comparison)
-- ✅ Stock availability filtering (`in_stock_only=True`)
-- ✅ Fault isolation (failing scrapers do not crash engine)
-- ✅ Dynamic scraper registration and unregistration
+### จุดเด่นที่ได้รับการครอบคลุมในการทดสอบ
+- ✅ ลำดับวงจรชีวิตของ Template Method (`fetch` $\rightarrow$ `parse` $\rightarrow$ `validate`)
+- ✅ การกรองข้อมูลที่ผิดปกติหรือไม่สมบูรณ์ (ราคาติดลบ, ลิงก์ว่าง)
+- ✅ ความถูกต้องในการแปลงข้อมูลของแต่ละแพลตฟอร์ม (แปลงสตางค์เป็นบาท, แปลงสตริงเป็นตัวเลข)
+- ✅ การจัดเรียงราคาจากต่ำสุดไปสูงสุดข้ามทุกแพลตฟอร์ม
+- ✅ การแปลงสกุลเงินต่างประเทศ (USD เป็น THB)
+- ✅ การกรองความพร้อมของสินค้าในสต็อก (`in_stock_only=True`)
+- ✅ การแยกความผิดพลาด (สแครปเปอร์ที่ล่มจะไม่ทำให้ระบบหยุดทำงาน)
+- ✅ การลงทะเบียนและถอดถอนสแครปเปอร์แบบไดนามิก
 
 ---
 
-## 🔌 Extending the System (Adding New Scrapers)
+## 🔌 การขยายระบบเพิ่มเติม (Extending the System)
 
-Adding a new platform (e.g., Amazon, TikTok Shop) is clean and requires **zero changes** to existing codebase classes:
+การเพิ่มสแครปเปอร์สำหรับแพลตฟอร์มใหม่ (เช่น TikTok Shop, Amazon) สามารถทำได้อย่างง่ายดายโดยไม่ต้องแก้ไขโค้ดเดิมในระบบ:
 
 ```python
 from typing import Any
@@ -283,11 +284,11 @@ class MyCustomScraper(BaseScraper):
         return "https://shop.tiktok.com"
 
     def fetch(self, keyword: str) -> list[dict[str, Any]]:
-        # Platform-specific fetch/HTTP request
-        return [{"id": 1, "title": f"{keyword} Item", "price": 499.0}]
+        # จำลองการส่งคำขอไปยัง API ของ TikTok Shop
+        return [{"id": "tt_1", "title": f"{keyword} สินค้าคุณภาพดี", "price": 499.0}]
 
     def parse(self, raw_data: list[dict[str, Any]]) -> list[Product]:
-        # Convert platform payload into domain Product entities
+        # แปลงข้อมูลดิบของ TikTok Shop เป็นอ็อบเจกต์ Product ของระบบ
         return [
             Product(
                 name=item["title"],
@@ -300,6 +301,6 @@ class MyCustomScraper(BaseScraper):
             for item in raw_data
         ]
 
-# Register dynamically into the engine:
+# ลงทะเบียนเข้าสู่ระบบ Engine ได้ทันทีในขณะทำงาน:
 engine.register_scraper(MyCustomScraper())
 ```

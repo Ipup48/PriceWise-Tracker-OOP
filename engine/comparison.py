@@ -1,3 +1,13 @@
+"""เครื่องยนต์เปรียบเทียบราคาสินค้า (Price Comparison Engine)
+
+ปฏิบัติตามหลักการออกแบบ OOAD:
+    - Composition: ถือครองคอลเลกชันของสแครปเปอร์ (BaseScraper)
+    - Dependency Injection: รับ Scrapers และ Currency Converter ผ่านคอนสตรัคเตอร์
+    - Open/Closed Principle: ขยายระบบรองรับสแครปเปอร์ใหม่ได้โดยไม่ต้องแก้ไขโค้ดเดิม
+    - Single Responsibility Principle: รับผิดชอบเฉพาะการประสานงาน ปรับค่าเงิน และจัดอันดับราคา
+    - Fault Isolation: การล้มเหลวของร้านค้าใดร้านค้าหนึ่งจะไม่ทำให้ระบบหยุดทำงาน
+"""
+
 from dataclasses import dataclass, field
 import logging
 from typing import Sequence
@@ -11,12 +21,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class ComparisonItem:
-    """Represents a product item paired with its normalized comparison price.
+    """แทนข้อมูลสินค้าคู่กับราคาที่ปรับเทียบเป็นสกุลเงินเป้าหมายแล้ว
 
     Attributes:
-        product: The original scraped domain `Product`.
-        normalized_price: The price converted into the engine's target comparison currency.
-        target_currency: ISO currency code of the normalized price.
+        product: อ็อบเจกต์โดเมน Product ดั้งเดิมที่ดึงมาจากร้านค้า
+        normalized_price: ราคาที่แปลงเป็นสกุลเงินเปรียบเทียบเป้าหมายแล้ว
+        target_currency: รหัสสกุลเงินเป้าหมาย
     """
 
     product: Product
@@ -24,19 +34,19 @@ class ComparisonItem:
     target_currency: str
 
     def formatted_normalized_price(self) -> str:
-        """Return formatted price in the target comparison currency."""
+        """ส่งคืนข้อความแสดงราคาเปรียบเทียบในสกุลเงินเป้าหมายที่จัดรูปแบบแล้ว"""
         return f"{self.target_currency.upper()} {self.normalized_price:,.2f}"
 
 
 @dataclass
 class ComparisonResult:
-    """Aggregated comparison report across all scraped marketplace platforms.
+    """รายงานผลการเปรียบเทียบราคาที่รวบรวมจากทุกแพลตฟอร์ม
 
     Attributes:
-        keyword: The query string searched across platforms.
-        target_currency: The currency used for price comparison normalization.
-        items: List of `ComparisonItem` instances sorted lowest-to-highest price.
-        errors: Dictionary mapping platform names to error messages if any failed.
+        keyword: คำค้นหาที่ใช้ค้นหาในแต่ละแพลตฟอร์ม
+        target_currency: สกุลเงินที่ใช้ปรับมาตรฐานเพื่อการเปรียบเทียบราคา
+        items: รายการอ็อบเจกต์ ComparisonItem ที่จัดเรียงจากราคาต่ำสุดไปสูงสุด
+        errors: พจนานุกรมเก็บข้อความแจ้งเตือนข้อผิดพลาดของแต่ละแพลตฟอร์ม (ถ้ามี)
     """
 
     keyword: str
@@ -46,17 +56,17 @@ class ComparisonResult:
 
     @property
     def total_count(self) -> int:
-        """Total number of products found."""
+        """จำนวนสินค้าทั้งหมดที่ค้นพบ"""
         return len(self.items)
 
     @property
     def in_stock_items(self) -> list[ComparisonItem]:
-        """List of items currently in stock."""
+        """รายการสินค้าที่มีจำหน่ายในสต็อก"""
         return [item for item in self.items if item.product.in_stock]
 
     @property
     def best_deal(self) -> ComparisonItem | None:
-        """The lowest priced in-stock product, or lowest overall if none in stock."""
+        """สินค้าที่มีราคาต่ำที่สุดที่มีของในสต็อก หรือราคาต่ำสุดทั้งหมดหากของหมดทุกร้าน"""
         in_stock = self.in_stock_items
         if in_stock:
             return in_stock[0]
@@ -64,32 +74,30 @@ class ComparisonResult:
 
     @property
     def min_price(self) -> float:
-        """Minimum normalized price in the result set (0.0 if empty)."""
+        """ราคาต่ำสุดในชุดผลลัพธ์ (คืนค่า 0.0 หากไม่มีสินค้า)"""
         return self.items[0].normalized_price if self.items else 0.0
 
     @property
     def max_price(self) -> float:
-        """Maximum normalized price in the result set (0.0 if empty)."""
+        """ราคาสูงสุดในชุดผลลัพธ์ (คืนค่า 0.0 หากไม่มีสินค้า)"""
         return self.items[-1].normalized_price if self.items else 0.0
 
     @property
     def average_price(self) -> float:
-        """Average normalized price across all found products."""
+        """ราคาเฉลี่ยของสินค้าทั้งหมดที่ค้นพบ"""
         if not self.items:
             return 0.0
         return round(sum(item.normalized_price for item in self.items) / len(self.items), 2)
 
 
 class PriceComparisonEngine:
-    """Coordinates multiple marketplace scrapers, normalizes prices, and ranks deals.
+    """คลาสหลักที่ประสานงานสแครปเปอร์ร้านค้า ปรับค่าเงิน และจัดอันดับราคาดีลที่ดีที่สุด
 
-    Follows:
-        - Composition: Holds a collection of `BaseScraper` instances.
-        - Dependency Injection: Accepts scrapers and currency converter via constructor
-          or registration methods.
-        - Open/Closed Principle: Open to new scrapers without altering comparison logic.
-        - Single Responsibility Principle: Solely responsible for orchestrating
-          queries, aggregating data, normalizing currency, and sorting results.
+    ปฏิบัติตามหลักการ:
+        - Composition: รวบรวมอ็อบเจกต์ BaseScraper หลายรายการ
+        - Dependency Injection: รับตัวดึงข้อมูลและตัวแปลงค่าเงินผ่านคอนสตรัคเตอร์
+        - Open/Closed Principle: เปิดรับสแครปเปอร์ใหม่โดยไม่กระทบตรรกะการเปรียบเทียบ
+        - Single Responsibility Principle: รับผิดชอบประสานงาน รวบรวมข้อมูล ปรับค่าเงิน และจัดอันดับ
     """
 
     def __init__(
@@ -98,13 +106,12 @@ class PriceComparisonEngine:
         currency_converter: ICurrencyConverter | None = None,
         target_currency: str = "THB",
     ) -> None:
-        """Initialize the price comparison engine.
+        """เริ่มต้นอินสแตนซ์ของระบบเปรียบเทียบราคา
 
         Args:
-            scrapers: Optional initial list of marketplace scrapers to register.
-            currency_converter: Service implementing `ICurrencyConverter`.
-                                Defaults to `FixedRateCurrencyConverter` if None.
-            target_currency: Currency to normalize and sort prices against (default 'THB').
+            scrapers: รายการสแครปเปอร์เริ่มต้นที่ต้องการลงทะเบียนในระบบ
+            currency_converter: เซอร์วิสแปลงค่าเงินตาม ICurrencyConverter (ค่าเริ่มต้นคือ FixedRateCurrencyConverter)
+            target_currency: สกุลเงินเป้าหมายที่ใช้เทียบเคียงราคา (ค่าเริ่มต้นคือ 'THB')
         """
         self._scrapers: dict[str, BaseScraper] = {}
         self._currency_converter: ICurrencyConverter = (
@@ -118,47 +125,47 @@ class PriceComparisonEngine:
 
     @property
     def target_currency(self) -> str:
-        """The target currency code used for comparisons."""
+        """รหัสสกุลเงินเป้าหมายที่ใช้เปรียบเทียบราคา"""
         return self._target_currency
 
     @target_currency.setter
     def target_currency(self, currency: str) -> None:
-        """Set the target currency code."""
+        """กำหนดรหัสสกุลเงินเป้าหมาย"""
         if not currency or len(currency.strip()) != 3:
-            raise ValueError(f"Invalid currency code: {currency}")
+            raise ValueError(f"รหัสสกุลเงินไม่ถูกต้อง: {currency}")
         self._target_currency = currency.strip().upper()
 
     def register_scraper(self, scraper: BaseScraper) -> None:
-        """Register a new scraper into the engine.
+        """ลงทะเบียนสแครปเปอร์ตัวใหม่เข้าสู่ระบบ
 
         Args:
-            scraper: An instance implementing `BaseScraper`.
+            scraper: อ็อบเจกต์ที่สืบทอดมาจาก BaseScraper
         """
         if not isinstance(scraper, BaseScraper):
-            raise TypeError(f"Scraper must be an instance of BaseScraper, got {type(scraper)}")
+            raise TypeError(f"สแครปเปอร์ต้องเป็นอินสแตนซ์ของ BaseScraper ได้รับประเภท: {type(scraper)}")
 
         platform_key = scraper.platform_name.strip().lower()
         self._scrapers[platform_key] = scraper
-        logger.info(f"Registered scraper for platform: '{scraper.platform_name}'")
+        logger.info(f"ลงทะเบียนสแครปเปอร์สำหรับแพลตฟอร์ม: '{scraper.platform_name}'")
 
     def unregister_scraper(self, platform_name: str) -> bool:
-        """Remove a registered scraper by platform name.
+        """ยกเลิกการลงทะเบียนสแครปเปอร์ตามชื่อแพลตฟอร์ม
 
         Args:
-            platform_name: The name of the platform to remove.
+            platform_name: ชื่อแพลตฟอร์มที่ต้องการถอดออก
 
         Returns:
-            True if removed, False if not found.
+            True หากถอดสำเร็จ, False หากไม่พบแพลตฟอร์มดังกล่าว
         """
         platform_key = platform_name.strip().lower()
         if platform_key in self._scrapers:
             del self._scrapers[platform_key]
-            logger.info(f"Unregistered scraper for platform: '{platform_name}'")
+            logger.info(f"ยกเลิกการลงทะเบียนสแครปเปอร์แพลตฟอร์ม: '{platform_name}'")
             return True
         return False
 
     def get_registered_scrapers(self) -> list[BaseScraper]:
-        """Return list of all currently registered scrapers."""
+        """ส่งคืนรายการสแครปเปอร์ทั้งหมดที่ลงทะเบียนอยู่ในระบบปัจจุบัน"""
         return list(self._scrapers.values())
 
     def compare(
@@ -166,23 +173,23 @@ class PriceComparisonEngine:
         keyword: str,
         in_stock_only: bool = False,
     ) -> ComparisonResult:
-        """Scrape all registered marketplaces, aggregate products, and sort lowest-to-highest.
+        """ดึงข้อมูลจากทุกแพลตฟอร์ม รวบรวม แปลงค่าเงิน และเรียงลำดับจากราคาถูกสุดไปแพงสุด
 
         Args:
-            keyword: Product search query.
-            in_stock_only: If True, filters out items marked out of stock.
+            keyword: คำค้นหาสินค้า
+            in_stock_only: หากเป็น True จะคัดกรองเฉพาะสินค้าที่มีของในสต็อก
 
         Returns:
-            A `ComparisonResult` object with sorted items and summary statistics.
+            อ็อบเจกต์ ComparisonResult พร้อมสินค้าที่จัดเรียงและสถิติสรุปผล
         """
         if not keyword or not keyword.strip():
-            raise ValueError("Search keyword cannot be empty.")
+            raise ValueError("คำค้นหาสินค้าต้องไม่เป็นค่าว่าง")
 
         clean_keyword = keyword.strip()
         all_comparison_items: list[ComparisonItem] = []
         errors: dict[str, str] = {}
 
-        # 1. Aggregate from all registered scrapers with fault isolation
+        # 1. รวบรวมข้อมูลจากสแครปเปอร์ทั้งหมดพร้อมระบบแยกความผิดพลาด (Fault Isolation)
         for platform_key, scraper in self._scrapers.items():
             try:
                 products = scraper.scrape(clean_keyword)
@@ -190,7 +197,7 @@ class PriceComparisonEngine:
                     if in_stock_only and not product.in_stock:
                         continue
 
-                    # 2. Normalize price into target comparison currency
+                    # 2. ปรับมาตรฐานราคาเป็นสกุลเงินเป้าหมาย
                     normalized = self._currency_converter.convert(
                         amount=product.price,
                         from_currency=product.currency,
@@ -205,11 +212,11 @@ class PriceComparisonEngine:
                         )
                     )
             except Exception as exc:
-                error_msg = f"Failed to scrape from {scraper.platform_name}: {exc}"
+                error_msg = f"ไม่สามารถดึงข้อมูลจากแพลตฟอร์ม {scraper.platform_name}: {exc}"
                 logger.error(error_msg, exc_info=True)
                 errors[scraper.platform_name] = str(exc)
 
-        # 3. Sort items lowest-to-highest price
+        # 3. จัดเรียงสินค้าจากราคาต่ำสุดไปสูงสุด
         all_comparison_items.sort(key=lambda item: item.normalized_price)
 
         return ComparisonResult(

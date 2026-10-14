@@ -1,3 +1,15 @@
+"""การทดสอบหน่วยย่อย (Unit Tests) สำหรับเครื่องยนต์เปรียบเทียบราคา PriceComparisonEngine
+
+ครอบคลุม:
+    - ตรรกะการแปลงสกุลเงิน (Currency Converter)
+    - การประกอบอ็อบเจกต์และการฉีดความขึ้นต่อกัน (Composition & Dependency Injection)
+    - การจัดเรียงราคาจากต่ำสุดไปสูงสุด
+    - การปรับมาตรฐานสกุลเงินข้ามพรมแดน
+    - การกรองสถานะสินค้าคงคลัง (In-Stock Filtering)
+    - การแยกความผิดพลาดของระบบ (Fault Isolation)
+    - การตรวจสอบความถูกต้องของข้อมูลนำเข้า
+"""
+
 from typing import Any
 import pytest
 
@@ -10,7 +22,7 @@ from scrapers.shopee import MockShopeeScraper
 
 
 class BrokenScraper(BaseScraper):
-    """Failing scraper to test error isolation in the comparison engine."""
+    """สแครปเปอร์จำลองข้อผิดพลาดเพื่อทดสอบการแยกความผิดพลาด (Fault Isolation)"""
 
     @property
     def platform_name(self) -> str:
@@ -28,19 +40,19 @@ class BrokenScraper(BaseScraper):
 
 
 def test_currency_converter_logic() -> None:
-    """Test exchange rate conversions and custom rate updates."""
+    """ทดสอบตรรกะการแปลงอัตราแลกเปลี่ยนและการอัปเดตอัตราแลกเปลี่ยนแบบกำหนดเอง"""
     converter = FixedRateCurrencyConverter({"EUR": 0.90, "THB": 36.00})
 
-    # Test same currency
+    # สกุลเงินเดียวกัน ไม่ต้องแปลง
     assert converter.convert(100.0, "USD", "USD") == 100.0
 
-    # 100 USD to THB = 3600.0 THB
+    # 100 USD เป็น THB = 3600.0 THB
     assert converter.convert(100.0, "USD", "THB") == 3600.0
 
-    # Convert THB to USD: 3600 / 36 = 100.0
+    # แปลง THB กลับเป็น USD: 3600 / 36 = 100.0
     assert converter.convert(3600.0, "THB", "USD") == 100.0
 
-    # Dynamic rate update
+    # อัปเดตอัตราแลกเปลี่ยนใหม่ขณะทำงาน
     converter.set_rate("THB", 40.0)
     assert converter.convert(100.0, "USD", "THB") == 4000.0
 
@@ -49,41 +61,41 @@ def test_currency_converter_logic() -> None:
 
 
 def test_engine_composition_and_dependency_injection() -> None:
-    """Test engine accepts scrapers via constructor and registration methods."""
+    """ทดสอบการประกอบอ็อบเจกต์และการฉีดความขึ้นต่อกันผ่าน Constructor และเมธอดลงทะเบียน"""
     shopee = MockShopeeScraper()
     lazada = MockLazadaScraper()
 
-    # Constructor injection
+    # ฉีดผ่าน Constructor Injection
     engine = PriceComparisonEngine(scrapers=[shopee])
     assert len(engine.get_registered_scrapers()) == 1
 
-    # Registration method
+    # ลงทะเบียนเพิ่มเติมผ่านเมธอด
     engine.register_scraper(lazada)
     assert len(engine.get_registered_scrapers()) == 2
 
-    # Unregister
+    # ถอดการลงทะเบียน (Unregister)
     removed = engine.unregister_scraper("Shopee")
     assert removed is True
     assert len(engine.get_registered_scrapers()) == 1
 
-    # Invalid registration
+    # กรณีลงทะเบียนอ็อบเจกต์ที่ไม่ถูกต้อง
     with pytest.raises(TypeError):
         engine.register_scraper("not a scraper")  # type: ignore[arg-type]
 
 
 def test_engine_sorts_lowest_to_highest_price() -> None:
-    """Verify products are sorted lowest-to-highest across multiple platforms."""
+    """ตรวจสอบว่าระบบจัดเรียงสินค้าจากราคาต่ำสุดไปสูงสุดข้ามแพลตฟอร์มอย่างถูกต้อง"""
     shopee = MockShopeeScraper()
     lazada = MockLazadaScraper()
     engine = PriceComparisonEngine(scrapers=[shopee, lazada], target_currency="THB")
 
-    # Search for Sony Headphones
+    # ค้นหาหูฟัง Sony
     result = engine.compare("Sony")
     assert result.total_count == 2
     assert len(result.items) == 2
 
-    # Check ascending order
-    # Lazada is 11,450.00 THB vs Shopee 11,990.00 THB
+    # ตรวจสอบการเรียงลำดับจากน้อยไปมาก
+    # Lazada ราคา 11,450.00 THB vs Shopee ราคา 11,990.00 THB
     first_item = result.items[0]
     second_item = result.items[1]
 
@@ -93,7 +105,7 @@ def test_engine_sorts_lowest_to_highest_price() -> None:
     assert second_item.product.platform == "Shopee"
     assert second_item.normalized_price == 11990.00
 
-    # Summary statistics
+    # สถิติสรุปผล
     assert result.best_deal is not None
     assert result.best_deal.product.platform == "Lazada"
     assert result.min_price == 11450.00
@@ -102,7 +114,7 @@ def test_engine_sorts_lowest_to_highest_price() -> None:
 
 
 def test_engine_normalizes_cross_border_currencies() -> None:
-    """Test comparison properly converts international currencies to target currency."""
+    """ทดสอบการปรับมาตรฐานสกุลเงินข้ามพรมแดนให้เป็นสกุลเงินเป้าหมายเดียวกัน"""
     shopee = MockShopeeScraper()
     lazada = MockLazadaScraper()
     # 1 USD = 36.50 THB
@@ -113,9 +125,9 @@ def test_engine_normalizes_cross_border_currencies() -> None:
         target_currency="THB",
     )
 
-    # Search for AirPods
-    # Shopee price: 7,890.00 THB
-    # Lazada price: 219.00 USD -> 219 * 36.50 = 7,993.50 THB
+    # ค้นหา AirPods
+    # ราคา Shopee: 7,890.00 THB
+    # ราคา Lazada: 219.00 USD -> 219 * 36.50 = 7,993.50 THB
     result = engine.compare("AirPods")
     assert result.total_count == 2
 
@@ -133,12 +145,12 @@ def test_engine_normalizes_cross_border_currencies() -> None:
 
 
 def test_engine_in_stock_filter() -> None:
-    """Test filtering by stock availability."""
+    """ทดสอบการกรองเฉพาะสินค้าที่มีในสต็อก"""
     shopee = MockShopeeScraper()
     lazada = MockLazadaScraper()
     engine = PriceComparisonEngine(scrapers=[shopee, lazada])
 
-    # Logitech is Out of Stock on Shopee, In Stock on Lazada
+    # Logitech สินค้าหมดบน Shopee แต่มีจำหน่ายบน Lazada
     unfiltered = engine.compare("Logitech", in_stock_only=False)
     assert unfiltered.total_count == 2
 
@@ -149,24 +161,24 @@ def test_engine_in_stock_filter() -> None:
 
 
 def test_engine_fault_isolation() -> None:
-    """Ensure that a failing scraper doesn't crash the engine for other scrapers."""
+    """ทดสอบระบบแยกความผิดพลาด: ร้านค้าที่ล่มต้องไม่ทำให้ระบบทั้งหมดหยุดทำงาน"""
     shopee = MockShopeeScraper()
     broken = BrokenScraper()
 
     engine = PriceComparisonEngine(scrapers=[shopee, broken])
     result = engine.compare("Sony")
 
-    # Shopee results should still succeed
+    # ผลลัพธ์จาก Shopee ต้องยังคงได้สำเร็จ
     assert result.total_count >= 1
     assert result.items[0].product.platform == "Shopee"
 
-    # Broken platform error is recorded
+    # ข้อผิดพลาดของ BrokenPlatform ถูกบันทึกไว้ใน errors
     assert "BrokenPlatform" in result.errors
     assert "Simulated network timeout" in result.errors["BrokenPlatform"]
 
 
 def test_engine_empty_input_validation() -> None:
-    """Test engine validates non-empty query string."""
+    """ทดสอบการตรวจสอบความถูกต้องเมื่อส่งคำค้นหาที่เป็นค่าว่าง"""
     engine = PriceComparisonEngine()
-    with pytest.raises(ValueError, match="Search keyword cannot be empty"):
+    with pytest.raises(ValueError, match="คำค้นหาสินค้าต้องไม่เป็นค่าว่าง"):
         engine.compare("   ")
