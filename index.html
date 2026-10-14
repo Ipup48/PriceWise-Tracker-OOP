@@ -127,18 +127,6 @@
           </form>
         </div>
 
-        <!-- ปุ่มเปิดสถาปัตยกรรม UML -->
-        <div class="flex items-center gap-2 shrink-0">
-          <button 
-            type="button" 
-            id="open-architecture-btn"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl text-xs font-medium transition border border-slate-200"
-          >
-            <i data-lucide="boxes" class="w-3.5 h-3.5 text-indigo-600"></i>
-            <span class="hidden sm:inline">สถาปัตยกรรม OOAD</span>
-            <span class="sm:hidden">UML</span>
-          </button>
-        </div>
 
       </div>
 
@@ -232,8 +220,8 @@
           <label class="block text-xs font-semibold text-slate-700 mb-2">
             สกุลเงินเปรียบเทียบ
           </label>
-          <div class="grid grid-cols-3 gap-1.5">
-            <button type="button" data-currency="THB" class="currency-btn py-1 px-2 rounded-lg border border-indigo-600 bg-indigo-50 text-indigo-700 text-xs font-semibold text-center transition">
+          <div class="grid grid-cols-3 gap-1.5" id="currency-btn-group">
+            <button type="button" data-currency="THB" class="currency-btn py-1 px-2 rounded-lg border border-indigo-600 bg-indigo-600 text-white text-xs font-semibold text-center shadow-xs transition">
               ฿ THB
             </button>
             <button type="button" data-currency="USD" class="currency-btn py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-medium text-center hover:bg-slate-50 transition">
@@ -245,7 +233,7 @@
           </div>
         </div>
 
-        <!-- 3. ตัวกรองราคาสูงสุด (รองรับได้ถึง 60,000 บาท) -->
+        <!-- 3. ตัวกรองราคาสูงสุด -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="text-xs font-semibold text-slate-700">เพดานราคาสูงสุด</label>
@@ -261,8 +249,8 @@
             class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
           />
           <div class="flex justify-between text-[10px] text-slate-600 mt-1">
-            <span>฿1,000</span>
-            <span>฿60,000+</span>
+            <span id="price-slider-min-label">฿1,000</span>
+            <span id="price-slider-max-label">฿60,000+</span>
           </div>
         </div>
 
@@ -426,148 +414,6 @@
     </div>
   </footer>
 
-  <!-- ========================================================================= -->
-  <!-- ARCHITECTURE & UML EXPLANATION MODAL -->
-  <!-- ========================================================================= -->
-  <div id="architecture-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
-    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden transform scale-95 transition-transform duration-200" id="modal-card">
-      
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-900 text-white">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-emerald-400">
-            <i data-lucide="boxes" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="text-base font-bold tracking-tight">สถาปัตยกรรมระบบ & การออกแบบ OOAD</h3>
-            <p class="text-xs text-slate-400">การประยุกต์ใช้ Object-Oriented Design Patterns & หลักการ SOLID Principles</p>
-          </div>
-        </div>
-        <button type="button" id="close-modal-btn" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <!-- Modal Tabs -->
-      <div class="flex border-b border-slate-200 bg-slate-50 px-6 gap-2 text-xs font-semibold">
-        <button class="modal-tab-btn px-4 py-2.5 border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-1.5" data-tab="tab-uml">
-          <i data-lucide="git-fork" class="w-3.5 h-3.5"></i>
-          <span>แผนภาพคลาส UML</span>
-        </button>
-        <button class="modal-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-tab="tab-template">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span>Template Method</span>
-        </button>
-        <button class="modal-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-tab="tab-solid">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          <span>หลักการ SOLID</span>
-        </button>
-        <button class="modal-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5" data-tab="tab-live">
-          <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
-          <span>บันทึกการทำงานสด (Live Trace)</span>
-        </button>
-      </div>
-
-      <!-- Modal Content Body -->
-      <div class="p-6 overflow-y-auto space-y-5 flex-1 text-slate-700 text-sm">
-        
-        <!-- Tab 1: UML Class Diagram -->
-        <div id="tab-uml" class="modal-tab-content space-y-4">
-          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <i data-lucide="network" class="w-4 h-4 text-indigo-600"></i>
-              <span>สถาปัตยกรรมเชิงวัตถุระดับสูง (High-Level OOP Architecture)</span>
-            </h4>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              โครงสร้างระบบถูกออกแบบให้แยกหน้าที่กันอย่างชัดเจน (Decoupled) ระหว่าง <strong>Domain Models</strong>, <strong>Abstract Scraper Interfaces</strong>, <strong>Platform Subclasses</strong>, <strong>Currency Services</strong> และศูนย์กลาง <strong>Price Comparison Engine</strong>
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2">
-              <div class="bg-white border-2 border-indigo-500/40 rounded-xl p-3.5 shadow-xs space-y-2">
-                <div class="flex items-center justify-between border-b pb-2">
-                  <span class="font-bold text-xs text-indigo-800">Class: PriceComparisonEngine</span>
-                  <span class="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded">Aggregator / Context</span>
-                </div>
-                <div class="text-[11px] font-mono text-slate-600 space-y-1">
-                  <div>- _scrapers: Map&lt;string, BaseScraper&gt;</div>
-                  <div>- _converter: ICurrencyConverter</div>
-                  <div>- _targetCurrency: string</div>
-                </div>
-                <div class="text-[11px] font-mono text-indigo-700 border-t pt-1.5 space-y-0.5">
-                  <div>+ registerScraper(scraper: BaseScraper)</div>
-                  <div>+ unregisterScraper(name: string)</div>
-                  <div>+ compare(keyword: string): ComparisonResult</div>
-                </div>
-              </div>
-
-              <div class="bg-white border-2 border-emerald-500/40 rounded-xl p-3.5 shadow-xs space-y-2">
-                <div class="flex items-center justify-between border-b pb-2">
-                  <span class="font-bold text-xs text-emerald-800">&laquo;abstract&raquo; BaseScraper</span>
-                  <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded">Template Pattern</span>
-                </div>
-                <div class="text-[11px] font-mono text-slate-600 space-y-1">
-                  <div>+ platformName: string (abstract)</div>
-                  <div>+ baseUrl: string (abstract)</div>
-                </div>
-                <div class="text-[11px] font-mono text-emerald-700 border-t pt-1.5 space-y-0.5">
-                  <div class="font-bold text-slate-900">+ scrape(keyword): Product[] (Template Method)</div>
-                  <div># fetch(keyword)*: rawData[]</div>
-                  <div># parse(rawData)*: Product[]</div>
-                  <div>+ validate(products): Product[]</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 2: Template Method Pattern -->
-        <div id="tab-template" class="modal-tab-content space-y-4 hidden">
-          <div class="p-4 bg-gradient-to-br from-indigo-50/70 to-white rounded-2xl border border-indigo-100 space-y-3">
-            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-              <i data-lucide="git-commit" class="w-4 h-4 text-indigo-600"></i>
-              <span>ลำดับวงจรชีวิตของ Template Method (Lifecycle Sequence)</span>
-            </h4>
-            <p class="text-xs text-slate-600 leading-relaxed">
-              เมธอด <span class="font-mono font-semibold">BaseScraper.scrape(keyword)</span> กำหนดโครงสร้างการทำงานตายตัวที่แน่นอน โดยคลาสลูกจะเขียนโค้ดเฉพาะส่วนดึงและแปลงข้อมูลของแพลตฟอร์มตนเอง โดยไม่สามารถข้ามหรือเปลี่ยนลำดับขั้นตอนได้
-            </p>
-          </div>
-        </div>
-
-        <!-- Tab 3: SOLID Principles -->
-        <div id="tab-solid" class="modal-tab-content space-y-3 hidden">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
-              <span class="font-bold text-xs text-indigo-700">S &bull; Single Responsibility Principle</span>
-              <p class="text-[11px] text-slate-600">Product รับผิดชอบเฉพาะข้อมูลสินค้า, Scraper รับผิดชอบเฉพาะการดึงข้อมูล และ Engine รับผิดชอบประสานงาน</p>
-            </div>
-            <div class="p-3.5 rounded-xl border border-slate-200 bg-white space-y-1">
-              <span class="font-bold text-xs text-emerald-700">O &bull; Open / Closed Principle</span>
-              <p class="text-[11px] text-slate-600">สามารถเพิ่มสแครปเปอร์ใหม่ เช่น Amazon ในขณะทำงานผ่าน registerScraper() ได้โดยไม่ต้องแก้โค้ดเดิม</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 4: Live Execution Trace -->
-        <div id="tab-live" class="modal-tab-content space-y-3 hidden">
-          <div class="p-4 bg-slate-950 text-emerald-400 font-mono text-xs rounded-2xl shadow-inner space-y-1.5 max-h-72 overflow-y-auto" id="live-console-log">
-            <div class="text-slate-500">// บันทึกวงจรชีวิตการทำงานของระบบ OOAD แบบเรียลไทม์...</div>
-          </div>
-          <button type="button" id="clear-trace-btn" class="text-xs text-slate-500 hover:text-slate-700 font-medium underline">
-            ล้างบันทึก (Clear Logs)
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Modal Footer -->
-      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
-        <button type="button" id="close-modal-bottom-btn" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-medium transition">
-          ปิดหน้าต่าง
-        </button>
-      </div>
-
-    </div>
-  </div>
 
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT: EMBEDDED OBJECT-ORIENTED SIMULATION (VANILLA ES6) -->
@@ -624,35 +470,48 @@
       }
 
       formattedPrice() {
-        const symbols = { THB: '฿', USD: '$', EUR: '€', GBP: '£', JPY: '¥' };
-        const sym = symbols[this.currency] || `${this.currency} `;
+        const sym = getCurrencySymbol(this.currency);
         return `${sym}${this.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
     }
 
+    function getCurrencySymbol(currency) {
+      const symbols = { THB: '฿', USD: '$', EUR: '€', GBP: '£', JPY: '¥' };
+      return symbols[(currency || 'THB').toUpperCase()] || `${currency} `;
+    }
+
     class FixedRateCurrencyConverter {
-      constructor(ratesToUsd = null) {
-        this.ratesToUsd = {
-          USD: 1.0,
-          THB: 36.50,
-          EUR: 0.92,
-          GBP: 0.79,
-          JPY: 155.00,
+      constructor(ratesToThb = null) {
+        // กำหนดอัตราแลกเปลี่ยนพื้นฐานเทียบกับ THB เป็นเกณฑ์หลัก:
+        // 1 THB = 1.0 THB
+        // 1 USD ≈ 36.0 THB
+        // 1 EUR ≈ 39.0 THB
+        // 1 GBP ≈ 46.0 THB
+        // 1 JPY ≈ 0.24 THB
+        this.ratesToThb = {
+          THB: 1.0,
+          USD: 36.0,
+          EUR: 39.0,
+          GBP: 46.0,
+          JPY: 0.24,
         };
-        if (ratesToUsd) {
-          Object.assign(this.ratesToUsd, ratesToUsd);
+        if (ratesToThb) {
+          Object.assign(this.ratesToThb, ratesToThb);
         }
       }
 
       convert(amount, fromCurrency, toCurrency) {
-        const from = fromCurrency.toUpperCase();
-        const to = toCurrency.toUpperCase();
-        if (from === to) return amount;
-        if (!this.ratesToUsd[from] || !this.ratesToUsd[to]) {
+        const from = (fromCurrency || 'THB').toUpperCase();
+        const to = (toCurrency || 'THB').toUpperCase();
+        const numAmount = Number(amount) || 0;
+        if (from === to) return numAmount;
+        if (!this.ratesToThb[from] || !this.ratesToThb[to]) {
           throw new Error(`ไม่รองรับการแปลงสกุลเงินระหว่าง: ${from} ไปยัง ${to}`);
         }
-        const rate = this.ratesToUsd[to] / this.ratesToUsd[from];
-        return Math.round((amount * rate) * 100) / 100;
+        // แปลงมูลค่าจากสกุลต้นทางเป็น THB แล้วแปลงเป็นสกุลปลายทาง
+        const amountInThb = numAmount * this.ratesToThb[from];
+        const converted = amountInThb / this.ratesToThb[to];
+        return Math.round(converted * 100) / 100;
       }
     }
 
@@ -973,13 +832,23 @@
                 this.targetCurrency
               );
 
+              const normalizedOriginalPrice = this.converter.convert(
+                product.originalPrice,
+                product.currency,
+                this.targetCurrency
+              );
+
               if (normalizedPrice > maxPrice) return;
+
+              const sym = getCurrencySymbol(this.targetCurrency);
 
               allItems.push({
                 product,
                 normalizedPrice,
+                normalizedOriginalPrice,
                 targetCurrency: this.targetCurrency,
-                formattedNormalizedPrice: `${this.targetCurrency === 'THB' ? '฿' : (this.targetCurrency === 'USD' ? '$' : '€')}${normalizedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                formattedNormalizedPrice: `${sym}${normalizedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                formattedNormalizedOriginalPrice: `${sym}${normalizedOriginalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
               });
             });
           } catch (err) {
@@ -1018,6 +887,68 @@
     let lazadaScraper;
     let amazonScraper;
     let currentComparisonResult = null;
+    let currentSearchQuery = 'Sony WH-1000XM5';
+
+    const CURRENCY_SLIDER_CONFIG = {
+      THB: {
+        min: 1000,
+        max: 60000,
+        step: 1000,
+        minLabel: '฿1,000',
+        maxLabel: '฿60,000+',
+        defaultVal: 60000
+      },
+      USD: {
+        min: 25,
+        max: 2000,
+        step: 25,
+        minLabel: '$25',
+        maxLabel: '$2,000+',
+        defaultVal: 2000
+      },
+      EUR: {
+        min: 25,
+        max: 1800,
+        step: 25,
+        minLabel: '€25',
+        maxLabel: '€1,800+',
+        defaultVal: 1800
+      }
+    };
+
+    function getCurrentSearchQuery() {
+      const inputEl = document.getElementById('search-input');
+      const inputVal = inputEl ? inputEl.value.trim() : '';
+      return inputVal || currentSearchQuery || 'Sony';
+    }
+
+    function updateCurrencySlider(prevCurrency, newCurrency) {
+      const slider = document.getElementById('price-range-slider');
+      const sliderLabel = document.getElementById('price-slider-label');
+      const minLabelEl = document.getElementById('price-slider-min-label');
+      const maxLabelEl = document.getElementById('price-slider-max-label');
+      const cfg = CURRENCY_SLIDER_CONFIG[newCurrency] || CURRENCY_SLIDER_CONFIG.THB;
+      const sym = getCurrencySymbol(newCurrency);
+
+      const oldVal = Number(slider.value);
+      const oldMax = Number(slider.max);
+
+      slider.min = cfg.min;
+      slider.max = cfg.max;
+      slider.step = cfg.step;
+
+      if (oldVal >= oldMax * 0.98) {
+        slider.value = cfg.max;
+      } else {
+        const converted = engine.converter.convert(oldVal, prevCurrency, newCurrency);
+        const stepped = Math.round(converted / cfg.step) * cfg.step;
+        slider.value = Math.min(cfg.max, Math.max(cfg.min, stepped));
+      }
+
+      sliderLabel.textContent = `${sym}${Number(slider.value).toLocaleString()}`;
+      if (minLabelEl) minLabelEl.textContent = cfg.minLabel;
+      if (maxLabelEl) maxLabelEl.textContent = cfg.maxLabel;
+    }
 
     function initApp() {
       const converter = new FixedRateCurrencyConverter();
@@ -1235,14 +1166,23 @@
 
       document.querySelectorAll('.currency-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const cur = btn.getAttribute('data-currency');
+          const newCur = btn.getAttribute('data-currency');
+          const oldCur = engine.targetCurrency;
+          if (newCur === oldCur) return;
+
+          engine.targetCurrency = newCur;
+
+          // ปรับ Active state บนปุ่มสกุลเงินที่เลือก (ไฮไลต์ชัดเจน)
           document.querySelectorAll('.currency-btn').forEach(b => {
             b.className = 'currency-btn py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-medium text-center hover:bg-slate-50 transition';
           });
-          btn.className = 'currency-btn py-1 px-2 rounded-lg border border-indigo-600 bg-indigo-50 text-indigo-700 text-xs font-semibold text-center transition';
+          btn.className = 'currency-btn py-1 px-2 rounded-lg border border-indigo-600 bg-indigo-600 text-white text-xs font-semibold text-center shadow-xs transition';
 
-          engine.targetCurrency = cur;
-          performSearch(searchInput.value);
+          // อัปเดต Slider และ Labels ของเพดานราคาสูงสุด
+          updateCurrencySlider(oldCur, newCur);
+
+          // รันการค้นหาและคำนวณราคาใหม่ตามสกุลเงินที่เลือก
+          performSearch(getCurrentSearchQuery());
         });
       });
 
@@ -1252,16 +1192,16 @@
       const sortSelect = document.getElementById('sort-select');
 
       slider.addEventListener('input', () => {
-        const sym = engine.targetCurrency === 'THB' ? '฿' : (engine.targetCurrency === 'USD' ? '$' : '€');
+        const sym = getCurrencySymbol(engine.targetCurrency);
         sliderLabel.textContent = `${sym}${Number(slider.value).toLocaleString()}`;
-        performSearch(searchInput.value);
+        performSearch(getCurrentSearchQuery());
       });
 
-      stockToggle.addEventListener('change', () => performSearch(searchInput.value));
+      stockToggle.addEventListener('change', () => performSearch(getCurrentSearchQuery()));
       sortSelect.addEventListener('change', () => renderProducts());
 
       document.querySelectorAll('.platform-checkbox').forEach(cb => {
-        cb.addEventListener('change', () => performSearch(searchInput.value));
+        cb.addEventListener('change', () => performSearch(getCurrentSearchQuery()));
       });
 
       document.getElementById('reset-filters-btn').addEventListener('click', () => {
@@ -1269,55 +1209,14 @@
         document.getElementById('platform-lazada').checked = true;
         document.getElementById('platform-amazon').checked = true;
         stockToggle.checked = false;
-        slider.value = 60000;
-        const sym = engine.targetCurrency === 'THB' ? '฿' : (engine.targetCurrency === 'USD' ? '$' : '€');
-        sliderLabel.textContent = `${sym}60,000`;
+
+        const cfg = CURRENCY_SLIDER_CONFIG[engine.targetCurrency] || CURRENCY_SLIDER_CONFIG.THB;
+        slider.value = cfg.defaultVal;
+        const sym = getCurrencySymbol(engine.targetCurrency);
+        sliderLabel.textContent = `${sym}${Number(cfg.defaultVal).toLocaleString()}`;
         sortSelect.value = 'price-asc';
-        // reset → กลับไปที่ปุ่มสินค้าแรกของหมวดปัจจุบัน
         renderProductTags(activeCat);
       });
-
-      const modal = document.getElementById('architecture-modal');
-      const modalCard = document.getElementById('modal-card');
-      const openModalBtn = document.getElementById('open-architecture-btn');
-      const closeModalBtn = document.getElementById('close-modal-btn');
-      const closeModalBottomBtn = document.getElementById('close-modal-bottom-btn');
-
-      function openModal() {
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-          modal.classList.remove('opacity-0');
-          modalCard.classList.remove('scale-95');
-        }, 10);
-      }
-
-      function closeModal() {
-        modal.classList.add('opacity-0');
-        modalCard.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 200);
-      }
-
-      openModalBtn.addEventListener('click', openModal);
-      closeModalBtn.addEventListener('click', closeModal);
-      closeModalBottomBtn.addEventListener('click', closeModal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-      });
-
-      document.querySelectorAll('.modal-tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tabId = btn.getAttribute('data-tab');
-          document.querySelectorAll('.modal-tab-btn').forEach(b => {
-            b.className = 'modal-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-1.5';
-          });
-          btn.className = 'modal-tab-btn px-4 py-2.5 border-b-2 border-indigo-600 text-indigo-700 flex items-center gap-1.5';
-
-          document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.add('hidden'));
-          document.getElementById(tabId).classList.remove('hidden');
-        });
-      });
-
-      document.getElementById('clear-trace-btn').addEventListener('click', () => ExecutionLogger.clear());
     }
 
     function getEnabledPlatforms() {
@@ -1329,13 +1228,15 @@
     }
 
     function performSearch(query) {
-      if (!query || !query.trim()) return;
+      const searchQuery = (query && query.trim()) ? query.trim() : getCurrentSearchQuery();
+      if (!searchQuery) return;
+      currentSearchQuery = searchQuery;
 
       const inStockOnly = document.getElementById('stock-filter').checked;
       const maxPrice = Number(document.getElementById('price-range-slider').value);
       const enabledPlatforms = getEnabledPlatforms();
 
-      currentComparisonResult = engine.compare(query, {
+      currentComparisonResult = engine.compare(searchQuery, {
         inStockOnly,
         maxPrice,
         enabledPlatforms
@@ -1347,7 +1248,8 @@
 
     function updateMetrics() {
       const res = currentComparisonResult;
-      const sym = res.targetCurrency === 'THB' ? '฿' : (res.targetCurrency === 'USD' ? '$' : '€');
+      if (!res) return;
+      const sym = getCurrencySymbol(res.targetCurrency);
 
       document.getElementById('query-display-label').textContent = `"${res.keyword}"`;
       document.getElementById('results-count-badge').textContent = `${res.stats.count} รายการ`;
@@ -1360,12 +1262,12 @@
         document.getElementById('metric-cheapest-store').textContent = 'ไม่มีสินค้า';
       }
 
-      document.getElementById('metric-average').textContent = `${sym}${res.stats.avg.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      document.getElementById('metric-average').textContent = `${sym}${res.stats.avg.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-      document.getElementById('metric-highest').textContent = `${sym}${res.stats.max.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+      document.getElementById('metric-highest').textContent = `${sym}${res.stats.max.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       const savings = Math.max(0, res.stats.max - res.stats.min);
       document.getElementById('metric-savings').textContent = savings > 0 
-        ? `ประหยัดได้ถึง ${sym}${savings.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+        ? `ประหยัดได้ถึง ${sym}${savings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         : 'ราคาเท่ากันทุกร้าน';
 
       const enabledCount = getEnabledPlatforms().length;
@@ -1474,7 +1376,7 @@
 
                 ${p.originalPrice > p.price ? `
                   <div class="text-[11px] text-slate-600 line-through">
-                    ${p.currency} ${p.originalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    ${item.formattedNormalizedOriginalPrice}
                   </div>
                 ` : ''}
               </div>
